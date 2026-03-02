@@ -39,8 +39,7 @@ jobs:
       artifact-repo-id: "internal-platform-api-eu"
       image-tag: ${{ github.sha }}
       working-directory: "terraform"
-      # The envctl deploy.yml passed this to both TF applies
-      extra-tf-vars: "-var=\"database_url=${{ secrets.DATABASE_URL }}\""
+
     secrets:
       GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
       GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
