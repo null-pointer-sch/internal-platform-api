@@ -11,10 +11,14 @@ class Deployment(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    environment_id = Column(UUID(as_uuid=True), ForeignKey("environments.id"), nullable=False)
+    environment_id = Column(
+        UUID(as_uuid=True), ForeignKey("environments.id"), nullable=False
+    )
 
     version = Column(String(100), nullable=False)  # e.g. git SHA, tag, build number
-    status = Column(String(50), nullable=False, default="pending")  # pending|running|succeeded|failed
+    status = Column(
+        String(50), nullable=False, default="pending"
+    )  # pending|running|succeeded|failed
 
     logs_url = Column(String(512), nullable=True)
 

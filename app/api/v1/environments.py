@@ -21,7 +21,9 @@ def _get_project_or_404(db: Session, project_id: UUID, user_id: UUID) -> Project
         select(Project).where(Project.id == project_id)
     ).scalar_one_or_none()
     if not project or project.owner_id != user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
+        )
     return project
 
 
@@ -68,9 +70,11 @@ def list_environments_for_project(
 ):
     _get_project_or_404(db, project_id, current_user.id)
 
-    envs = db.execute(
-        select(Environment).where(Environment.project_id == project_id)
-    ).scalars().all()
+    envs = (
+        db.execute(select(Environment).where(Environment.project_id == project_id))
+        .scalars()
+        .all()
+    )
 
     return envs
 
@@ -86,7 +90,9 @@ def get_environment(
     ).scalar_one_or_none()
 
     if not env:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found"
+        )
 
     # verify ownership via project
     project: Project | None = db.execute(
@@ -94,7 +100,9 @@ def get_environment(
     ).scalar_one_or_none()
 
     if not project or project.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found"
+        )
 
     return env
 
@@ -110,14 +118,18 @@ def delete_environment(
     ).scalar_one_or_none()
 
     if not env:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found"
+        )
 
     project: Project | None = db.execute(
         select(Project).where(Project.id == env.project_id)
     ).scalar_one_or_none()
 
     if not project or project.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found"
+        )
 
     db.delete(env)
     db.commit()

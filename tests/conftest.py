@@ -35,7 +35,7 @@ def client(test_db):
         try:
             yield test_db
         finally:
-            pass # db is closed in test_db fixture
+            pass  # db is closed in test_db fixture
 
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:

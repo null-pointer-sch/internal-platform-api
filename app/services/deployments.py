@@ -49,6 +49,7 @@ def run_deployment(deployment_id, db_factory=SessionLocal):
     finally:
         db.close()
 
+
 def get_env_owned_by_user(
     db: Session,
     env_id: UUID,
@@ -58,16 +59,21 @@ def get_env_owned_by_user(
         select(Environment).where(Environment.id == env_id)
     ).scalar_one_or_none()
     if not env:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found"
+        )
 
     project: Project | None = db.execute(
         select(Project).where(Project.id == env.project_id)
     ).scalar_one_or_none()
 
     if not project or project.owner_id != user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Environment not found"
+        )
 
     return env
+
 
 def create_deployment(
     db: Session,
@@ -98,11 +104,15 @@ def create_deployment(
 
     return dep
 
+
 def list_deployments(db: Session, env_id: UUID, user_id: UUID) -> list[Deployment]:
     get_env_owned_by_user(db, env_id, user_id)
-    return db.execute(
-        select(Deployment).where(Deployment.environment_id == env_id)
-    ).scalars().all()
+    return (
+        db.execute(select(Deployment).where(Deployment.environment_id == env_id))
+        .scalars()
+        .all()
+    )
+
 
 def get_deployment_by_id(db: Session, deployment_id: UUID, user_id: UUID) -> Deployment:
     dep: Deployment | None = db.execute(
@@ -110,19 +120,25 @@ def get_deployment_by_id(db: Session, deployment_id: UUID, user_id: UUID) -> Dep
     ).scalar_one_or_none()
 
     if not dep:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deployment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Deployment not found"
+        )
 
     # verify env → project → owner
     env: Environment | None = db.execute(
         select(Environment).where(Environment.id == dep.environment_id)
     ).scalar_one_or_none()
     if not env:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deployment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Deployment not found"
+        )
 
     project: Project | None = db.execute(
         select(Project).where(Project.id == env.project_id)
     ).scalar_one_or_none()
     if not project or project.owner_id != user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deployment not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Deployment not found"
+        )
 
     return dep

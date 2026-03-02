@@ -31,26 +31,30 @@ app.include_router(projects_router, prefix="/api/v1")
 app.include_router(environments_router, prefix="/api/v1")
 app.include_router(deployments_router, prefix="/api/v1")
 
+
 @app.on_event("startup")
 def on_startup():
-    max_retries = 10  
-    retry_delay = 5 
+    max_retries = 10
+    retry_delay = 5
 
     for attempt in range(max_retries):
         try:
             # Test the connection first
             with engine.connect() as connection:
-                connection.execute(text("SELECT 1")) 
+                connection.execute(text("SELECT 1"))
             Base.metadata.create_all(bind=engine)
             logger.info("Database connected and tables created successfully.")
             return  # Success, exit the function
         except OperationalError as e:
             if attempt < max_retries - 1:
-                logger.warning(f"DB connection failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {retry_delay} seconds...")
+                logger.warning(
+                    f"DB connection failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {retry_delay} seconds..."
+                )
                 time.sleep(retry_delay)
             else:
                 logger.error("Max retries reached. Could not connect to database.")
                 raise  # After max retries, let it fail
+
 
 @app.get("/health")
 def health():

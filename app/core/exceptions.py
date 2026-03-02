@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger("envctl")
 
+
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Global exception: {exc}", exc_info=True)
     return JSONResponse(
@@ -13,11 +14,13 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Internal Server Error"},
     )
 
+
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
     )
+
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(

@@ -14,7 +14,7 @@ class Environment(Base):
     project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
 
     name = Column(String(255), nullable=False)
-    type = Column(String(50), nullable=False)   # "ephemeral" | "persistent"
+    type = Column(String(50), nullable=False)  # "ephemeral" | "persistent"
 
     status = Column(String(50), nullable=False, default="provisioning")
     base_url = Column(String(512), nullable=True)
