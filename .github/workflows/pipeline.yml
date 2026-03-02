@@ -39,7 +39,6 @@ jobs:
       artifact-repo-id: "internal-platform-api-eu"
       image-tag: ${{ github.sha }}
       working-directory: "terraform"
-      extra-tf-vars: "-var=\"database_url=${{ secrets.DATABASE_URL }}\""
 
     secrets:
       GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"

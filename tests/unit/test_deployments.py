@@ -1,11 +1,8 @@
-from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.models.deployment import Deployment
 from app.models.environment import Environment
 from app.models.project import Project
 from app.models.user import User
 from app.services.deployments import run_deployment
-import pytest
 
 def test_run_deployment_success(test_db):
     # Setup
