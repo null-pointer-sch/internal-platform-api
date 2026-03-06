@@ -11,7 +11,7 @@ def register_user(db: Session, user_in: UserCreate) -> User:
     existing = users_repo.get_user_by_email(db, user_in.email)
     if existing:
         raise InvalidOperationException(detail="Email already registered")
-        
+
     user = User(
         email=user_in.email,
         password_hash=hash_password(user_in.password),

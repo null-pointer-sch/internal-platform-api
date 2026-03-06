@@ -69,8 +69,12 @@ app.add_middleware(
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
-app.add_exception_handler(ResourceNotFoundException, resource_not_found_exception_handler)
-app.add_exception_handler(InvalidOperationException, invalid_operation_exception_handler)
+app.add_exception_handler(
+    ResourceNotFoundException, resource_not_found_exception_handler
+)
+app.add_exception_handler(
+    InvalidOperationException, invalid_operation_exception_handler
+)
 
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(projects_router, prefix="/api/v1")
@@ -87,4 +91,3 @@ def health():
         logger.error(f"Health check failed: {e}")
         raise StarletteHTTPException(status_code=503, detail="Database not available")
     return {"status": "ok"}
-

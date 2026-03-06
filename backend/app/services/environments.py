@@ -14,7 +14,11 @@ from app.core.database import SessionLocal
 
 
 def create_environment_for_project(
-    db: Session, project_id: UUID, env_in: EnvironmentCreate, user_id: UUID, background_tasks: BackgroundTasks
+    db: Session,
+    project_id: UUID,
+    env_in: EnvironmentCreate,
+    user_id: UUID,
+    background_tasks: BackgroundTasks,
 ) -> Environment:
     project = projects_service.get_project_by_id_for_user(db, project_id, user_id)
 
@@ -37,16 +41,20 @@ def create_environment_for_project(
     return env
 
 
-def get_environments_for_project(db: Session, project_id: UUID, user_id: UUID) -> list[Environment]:
+def get_environments_for_project(
+    db: Session, project_id: UUID, user_id: UUID
+) -> list[Environment]:
     projects_service.get_project_by_id_for_user(db, project_id, user_id)
     return environments_repo.get_environments_for_project(db, project_id)
 
 
-def get_environment_by_id_for_user(db: Session, env_id: UUID, user_id: UUID) -> Environment:
+def get_environment_by_id_for_user(
+    db: Session, env_id: UUID, user_id: UUID
+) -> Environment:
     env = environments_repo.get_environment_by_id(db, env_id)
     if not env:
         raise ResourceNotFoundException(detail="Environment not found")
-        
+
     # verify ownership via project
     try:
         projects_service.get_project_by_id_for_user(db, env.project_id, user_id)

@@ -7,7 +7,9 @@ def test_cors_allowed_origin(client):
             "Access-Control-Request-Method": "GET",
         },
     )
-    assert response.headers.get("access-control-allow-origin") == "http://localhost:4200"
+    assert (
+        response.headers.get("access-control-allow-origin") == "http://localhost:4200"
+    )
 
 
 def test_cors_disallowed_origin(client):

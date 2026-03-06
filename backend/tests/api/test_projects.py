@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests.api.test_auth import auth_headers, register_user, login_user
+from tests.api.test_auth import auth_headers
 
 
 def create_project(client, headers, name="Test Project"):

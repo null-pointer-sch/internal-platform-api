@@ -14,11 +14,17 @@ def create_environment(db: Session, env: Environment) -> Environment:
 
 
 def get_environments_for_project(db: Session, project_id: UUID) -> List[Environment]:
-    return db.execute(select(Environment).where(Environment.project_id == project_id)).scalars().all()
+    return (
+        db.execute(select(Environment).where(Environment.project_id == project_id))
+        .scalars()
+        .all()
+    )
 
 
 def get_environment_by_id(db: Session, env_id: UUID) -> Optional[Environment]:
-    return db.execute(select(Environment).where(Environment.id == env_id)).scalar_one_or_none()
+    return db.execute(
+        select(Environment).where(Environment.id == env_id)
+    ).scalar_one_or_none()
 
 
 def delete_environment(db: Session, env: Environment) -> None:

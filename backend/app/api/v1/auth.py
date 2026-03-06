@@ -63,6 +63,7 @@ def get_current_user(
         raise credentials_exception
 
     import uuid as _uuid
+
     try:
         parsed_id = _uuid.UUID(user_id)
     except ValueError:

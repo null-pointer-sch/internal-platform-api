@@ -28,8 +28,14 @@ def create_project(db: Session, project_in: ProjectCreate, owner_id: UUID) -> Pr
     return project
 
 
-def get_project_by_id_and_owner(db: Session, project_id: UUID, owner_id: UUID) -> Optional[Project]:
-    return db.query(Project).filter(Project.id == project_id, Project.owner_id == owner_id).first()
+def get_project_by_id_and_owner(
+    db: Session, project_id: UUID, owner_id: UUID
+) -> Optional[Project]:
+    return (
+        db.query(Project)
+        .filter(Project.id == project_id, Project.owner_id == owner_id)
+        .first()
+    )
 
 
 def delete_project(db: Session, project: Project) -> None:

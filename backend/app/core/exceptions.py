@@ -19,14 +19,18 @@ class InvalidOperationException(Exception):
         super().__init__(self.detail)
 
 
-async def resource_not_found_exception_handler(request: Request, exc: ResourceNotFoundException):
+async def resource_not_found_exception_handler(
+    request: Request, exc: ResourceNotFoundException
+):
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": exc.detail},
     )
 
 
-async def invalid_operation_exception_handler(request: Request, exc: InvalidOperationException):
+async def invalid_operation_exception_handler(
+    request: Request, exc: InvalidOperationException
+):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

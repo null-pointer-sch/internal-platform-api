@@ -80,7 +80,9 @@ def get_deployment_by_id(db: Session, deployment_id: UUID, user_id: UUID) -> Dep
 
     # verify env → project → owner
     try:
-        environments_service.get_environment_by_id_for_user(db, dep.environment_id, user_id)
+        environments_service.get_environment_by_id_for_user(
+            db, dep.environment_id, user_id
+        )
     except ResourceNotFoundException:
         raise ResourceNotFoundException(detail="Deployment not found")
 
