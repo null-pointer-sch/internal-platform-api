@@ -1,4 +1,6 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -15,36 +17,29 @@ from app.core.exceptions import (
     global_exception_handler,
     http_exception_handler,
     validation_exception_handler,
+    ResourceNotFoundException,
+    resource_not_found_exception_handler,
+    InvalidOperationException,
+    invalid_operation_exception_handler,
 )
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("envctl")
 
-app = FastAPI()
 
-app.add_exception_handler(Exception, global_exception_handler)
-app.add_exception_handler(StarletteHTTPException, http_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_exception_handler)
-
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(projects_router, prefix="/api/v1")
-app.include_router(environments_router, prefix="/api/v1")
-app.include_router(deployments_router, prefix="/api/v1")
-
-
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     max_retries = 10
     retry_delay = 5
 
     for attempt in range(max_retries):
         try:
-            # Test the connection first
             with engine.connect() as connection:
                 connection.execute(text("SELECT 1"))
             Base.metadata.create_all(bind=engine)
             logger.info("Database connected and tables created successfully.")
-            return  # Success, exit the function
+            break
         except OperationalError as e:
             if attempt < max_retries - 1:
                 logger.warning(
@@ -53,12 +48,38 @@ def on_startup():
                 time.sleep(retry_delay)
             else:
                 logger.error("Max retries reached. Could not connect to database.")
-                raise  # After max retries, let it fail
+                raise
+
+    yield  # Application runs here
+
+    # Shutdown (if needed)
+    logger.info("Application shutting down.")
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_exception_handler(Exception, global_exception_handler)
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(ResourceNotFoundException, resource_not_found_exception_handler)
+app.add_exception_handler(InvalidOperationException, invalid_operation_exception_handler)
+
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(projects_router, prefix="/api/v1")
+app.include_router(environments_router, prefix="/api/v1")
+app.include_router(deployments_router, prefix="/api/v1")
 
 
 @app.get("/health")
 def health():
-    # optional: basic DB check
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
@@ -66,3 +87,4 @@ def health():
         logger.error(f"Health check failed: {e}")
         raise StarletteHTTPException(status_code=503, detail="Database not available")
     return {"status": "ok"}
+

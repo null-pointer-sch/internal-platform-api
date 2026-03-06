@@ -1,18 +1,15 @@
 import time
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
 
-from app.models.environment import Environment
+import app.repositories.environments as environments_repo
 
 
 def provision_environment(env_id, db_factory):
     # db_factory will be SessionLocal, to avoid keeping a session across threads
     db: Session = db_factory()
     try:
-        env: Environment | None = db.execute(
-            select(Environment).where(Environment.id == env_id)
-        ).scalar_one_or_none()
+        env = environments_repo.get_environment_by_id(db, env_id)
 
         if not env:
             return
@@ -28,7 +25,6 @@ def provision_environment(env_id, db_factory):
         if env.type == "ephemeral" and env.expires_at is None:
             env.expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
-        db.add(env)
-        db.commit()
+        environments_repo.save_environment(db, env)
     finally:
         db.close()

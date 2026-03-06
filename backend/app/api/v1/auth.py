@@ -4,10 +4,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import create_access_token
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
 from app.schemas.auth import Token
+from app.services import auth as auth_service
+from app.repositories import users as users_repo
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -16,20 +18,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == user_in.email).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
-        )
-    user = User(
-        email=user_in.email,
-        password_hash=hash_password(user_in.password),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    return auth_service.register_user(db, user_in)
 
 
 @router.post("/login", response_model=Token)
@@ -37,8 +26,8 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).filter(User.email == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.password_hash):
+    user = auth_service.authenticate_user(db, form_data.username, form_data.password)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -73,7 +62,13 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == user_id).first()
+    import uuid as _uuid
+    try:
+        parsed_id = _uuid.UUID(user_id)
+    except ValueError:
+        raise credentials_exception
+
+    user = users_repo.get_user_by_id(db, parsed_id)
     if user is None:
         raise credentials_exception
     return user
