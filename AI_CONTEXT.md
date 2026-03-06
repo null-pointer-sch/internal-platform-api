@@ -6,6 +6,7 @@ Before making changes, read these files first:
 - .engineering-principles/ENGINEERING_PRINCIPLES.md
 - .engineering-principles/ai/AI_INSTRUCTIONS.md
 - .engineering-principles/refactoring/REFACTOR_GUIDELINES.md
+- .engineering-principles/repo/REPO_HYGIENE.md
 
 ## Backend work
 - .engineering-principles/backend/BACKEND_RULES.md
