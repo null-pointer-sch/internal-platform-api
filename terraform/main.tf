@@ -12,70 +12,45 @@ provider "google" {
   region  = var.region
 }
 
-# Artifact Registry for Docker images
-resource "google_artifact_registry_repository" "repo" {
-  location      = var.region
-  repository_id = var.artifact_repo_id
-  format        = "DOCKER"
-  description   = "Repo for internal-platform-api images"
+# Artifact Registry via GitHub Module
+module "artifact_repo" {
+  source = "git::https://github.com/null-pointer-sch/cicd-templates.git//modules/google-artifact-registry?ref=v1.0.0"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  region        = var.region
+  repository_id = var.artifact_repo_id
+  description   = "Repo for internal-platform-api images"
 }
 
 import {
-  to = google_artifact_registry_repository.repo
+  to = module.artifact_repo.google_artifact_registry_repository.repo
   id = "projects/internal-platform-api/locations/europe-west1/repositories/internal-platform-api-eu"
 }
 
 import {
-  to = google_cloud_run_v2_service.api
+  to = module.api.google_cloud_run_v2_service.service
   id = "projects/internal-platform-api/locations/europe-west1/services/internal-platform-api"
 }
 
-# Cloud Run service
-resource "google_cloud_run_v2_service" "api" {
-  name     = "internal-platform-api"
-  location = var.region
+# Cloud Run via GitHub Module
+module "api" {
+  source = "git::https://github.com/null-pointer-sch/cicd-templates.git//modules/google-cloud-run?ref=v1.0.0"
 
-  template {
-    containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.repo.repository_id}/internal-platform-api:${var.image_tag}"
-      ports {
-        container_port = 8000  # Adjust if your Uvicorn port is different (common for FastAPI)
-      }
-      env {
-        name  = "DATABASE_URL"  # Example env var for your DB (add more as needed)
-        value = var.database_url
-      }
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "512Mi"
-        }
-      }
-    }
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 10
-    }
+  region         = var.region
+  service_name   = "internal-platform-api"
+  image          = "${var.region}-docker.pkg.dev/${var.project_id}/${module.artifact_repo.repository_id}/internal-platform-api:${var.image_tag}"
+  container_port = 8000
+  is_public      = true
+
+  env_vars = {
+    DATABASE_URL = var.database_url
   }
 
-  traffic {
-    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
-    percent = 100
-  }
-}
-
-# Make Cloud Run public (adjust IAM for auth if needed)
-resource "google_cloud_run_v2_service_iam_member" "public_access" {
-  name     = google_cloud_run_v2_service.api.name
-  location = var.region
-  role     = "roles/run.invoker"
-  member   = "allUsers"
+  cpu_limit          = "1"
+  memory_limit       = "512Mi"
+  min_instance_count = 0
+  max_instance_count = 10
 }
 
 output "cloud_run_url" {
-  value = try(google_cloud_run_v2_service.api.uri, null)
+  value = module.api.service_url
 }
