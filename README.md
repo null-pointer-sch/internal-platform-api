@@ -27,6 +27,14 @@ This project intentionally uses **simulated provisioning and deployment flows** 
 
 ---
 
+## ⚠️ Current Status
+
+The backend API and deployment are functional, but the deployed frontend authentication flow is still being stabilized. In the current Cloud Run environment, registration, login, and session persistence may behave inconsistently across the frontend and backend origins.
+
+For the most reliable testing experience, use the backend API directly via Swagger or curl while the frontend auth flow is being finalized.
+
+---
+
 ### Production Deployment
 - **Backend**: Google Cloud Run (fully managed, auto-scaling, serverless)
 - **Database**: Neon (serverless PostgreSQL with connection pooling)
@@ -38,7 +46,7 @@ This project intentionally uses **simulated provisioning and deployment flows** 
 ## 🚀 Features
 
 ### 🔐 Authentication
-- Register, login, and JWT-based authentication
+- Register, login, and session based authentication
 - Endpoints: `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/me`
 
 ### 📦 Projects
