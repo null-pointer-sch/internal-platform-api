@@ -42,12 +42,13 @@ class VerifyTokenRequest(BaseModel):
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
     verification_url = auth_service.register_user(db, user_in)
     
-    detail = "If the email can be registered, a verification link has been sent."
+    detail = "If the account exists and requires verification, verification instructions have been prepared."
+
     if settings.email_mode == "mock_terminal":
-        detail += " Dev Mode: The verification link was printed to the server terminal."
+        detail += " Dev Mode: The verification link was written to the server logs."
     elif settings.email_mode == "mock_api" and verification_url:
-        detail += " Dev Mode: No real email was sent. Use the link below to verify."
-    
+        detail += " Dev Mode: No real email was sent. Use the verification link included in this response."
+        
     return RegisterResponse(
         detail=detail,
         verification_url=verification_url,
@@ -80,9 +81,9 @@ def login(
         # Password was correct but email not verified
         detail = "Please verify your email before logging in."
         if settings.email_mode == "mock_terminal":
-            detail += " Dev Mode: The verification link was printed to the server terminal."
+            detail += " Dev Mode: The verification link was written to the server logs."
         elif settings.email_mode == "mock_api":
-            detail += " Dev Mode: No real email was sent. Use the link below to verify."
+            detail += " Dev Mode: No real email was sent. Use the verification link included in this response."
         
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -99,13 +100,19 @@ def login(
             detail="Invalid email or password.",
         )
 
+    # Cookie Security Settings for Cloud Run (different origins)
+    # We use SameSite=None + Secure=True for cross-origin cookie support.
+    # For local dev over plain HTTP, we use SameSite=Lax and Secure=False.
+    use_secure_cookies = settings.app_env != "local"
+    samesite_policy = "none" if use_secure_cookies else "lax"
+
     # Set Session Cookie
     response.set_cookie(
         key="envctl-session",
         value=session_id,
         httponly=True,
-        secure=False,  # Explicitly False for local plain HTTP
-        samesite="lax",
+        secure=True,          # in Cloud Run / HTTPS
+        samesite="none",      # for cross-origin frontend/backend
         path="/",
     )
 
@@ -114,9 +121,9 @@ def login(
     response.set_cookie(
         key="XSRF-TOKEN",
         value=csrf_token,
-        httponly=False,  # MUST be False so Angular JS can read it
-        secure=False,  # Explicitly False for local plain HTTP
-        samesite="lax",
+        httponly=False,
+        secure=True,
+        samesite="none",
         path="/",
     )
 

@@ -47,7 +47,8 @@ export class AuthService {
       `${environment.apiUrl}/api/v1/auth/login`,
       params.toString(),
       {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        withCredentials: true
       }
     ).pipe(
       tap(res => console.log('AuthService: Login POST success', res)),
@@ -57,15 +58,15 @@ export class AuthService {
   }
 
   register(data: RegisterData): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${environment.apiUrl}/api/v1/auth/register`, data);
+    return this.http.post<RegisterResponse>(`${environment.apiUrl}/api/v1/auth/register`, data, { withCredentials: true });
   }
 
   verifyEmail(token: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/api/v1/auth/verify-email`, { token });
+    return this.http.post(`${environment.apiUrl}/api/v1/auth/verify-email`, { token }, { withCredentials: true });
   }
 
   logout(): void {
-    this.http.post(`${environment.apiUrl}/api/v1/auth/logout`, {}).subscribe({
+    this.http.post(`${environment.apiUrl}/api/v1/auth/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
         this.currentUserSubject.next(null);
         this.router.navigate(['/login']);
@@ -93,7 +94,7 @@ export class AuthService {
 
   loadCurrentUser(): Observable<User | null> {
     console.log('AuthService: Loading current user...');
-    return this.http.get<User>(`${environment.apiUrl}/api/v1/auth/me`).pipe(
+    return this.http.get<User>(`${environment.apiUrl}/api/v1/auth/me`, { withCredentials: true }).pipe(
       tap(user => {
         console.log('AuthService: loadCurrentUser success', user);
         this.currentUserSubject.next(user);
