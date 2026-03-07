@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
@@ -66,6 +66,28 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Custom diagnostic logging for preflight debugging
+@app.middleware("http")
+async def log_preflight_diagnostic(request: Request, call_next):
+    if request.method == "OPTIONS":
+        logger.info(f"PREFLIGHT DIAGNOSTIC: Method={request.method}, Path={request.url.path}")
+        logger.info(f"PREFLIGHT DIAGNOSTIC: Origin={request.headers.get('origin')}")
+        logger.info(f"PREFLIGHT DIAGNOSTIC: ACR-Method={request.headers.get('access-control-request-method')}")
+        logger.info(f"PREFLIGHT DIAGNOSTIC: ACR-Headers={request.headers.get('access-control-request-headers')}")
+    
+    response = await call_next(request)
+    
+    if request.method == "OPTIONS":
+        logger.info(f"PREFLIGHT DIAGNOSTIC: Response Status={response.status_code}")
+    return response
+
+
+# Middleware Order: Outer to Inner
+# CORSMiddleware must be OUTERMOST (last added) to handle preflights before any other logic.
+# CSRFMiddleware should be INNER to CORS.
+
+app.add_middleware(CSRFMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -77,8 +99,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(CSRFMiddleware)
 
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)

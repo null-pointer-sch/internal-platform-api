@@ -5,6 +5,9 @@ from starlette.responses import JSONResponse
 
 class CSRFMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         if request.method in ["POST", "PUT", "PATCH", "DELETE"]:
             # If a session cookie is present, we mandate CSRF protection
             session = request.cookies.get("envctl-session")
