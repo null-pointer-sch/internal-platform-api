@@ -1,4 +1,4 @@
-# Triggering pipeline with v1.5.0 (Simple standard WIF-only configuration)
+# Triggering pipeline with Modular Actions
 name: Pipeline
 
 on:
@@ -19,38 +19,48 @@ jobs:
       python-version: "3.12"
       working-directory: "backend"
 
-  build-backend:
+  build-and-publish:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.5.0
-    with:
-      image-name: "internal-platform-api-backend"
-      project-id: "internal-platform-api"
-      repo-name: "internal-platform-api"
-      region: "europe-west1"
-      dockerfile-path: "backend/Dockerfile"
-      docker-context: "backend"
-    secrets:
-      GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-      GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  build-frontend:
-    needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.5.0
-    with:
-      image-name: "internal-platform-api-frontend"
-      project-id: "internal-platform-api"
-      repo-name: "internal-platform-api"
-      region: "europe-west1"
-      dockerfile-path: "frontend/Dockerfile"
-      docker-context: "frontend"
-    secrets:
-      GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-      GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
+      - name: Auth to GCP
+        uses: null-pointer-sch/cicd-templates/actions/gcp-auth@main
+        with:
+          wif-provider: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service-account: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
+          region: "europe-west1"
 
-  deploy-infra:
-    needs: [build-backend, build-frontend]
+      # Decoupled Build Steps
+      - name: Build Backend
+        uses: null-pointer-sch/cicd-templates/actions/docker-build@main
+        with:
+          image-name: "europe-west1-docker.pkg.dev/internal-platform-api/internal-platform-api/internal-platform-api-backend:${{ github.sha }}"
+          dockerfile-path: "backend/Dockerfile"
+          docker-context: "backend"
+
+      - name: Build Frontend
+        uses: null-pointer-sch/cicd-templates/actions/docker-build@main
+        with:
+          image-name: "europe-west1-docker.pkg.dev/internal-platform-api/internal-platform-api/internal-platform-api-frontend:${{ github.sha }}"
+          dockerfile-path: "frontend/Dockerfile"
+          docker-context: "frontend"
+
+      # Decoupled Publish Steps
+      - name: Publish Backend
+        uses: null-pointer-sch/cicd-templates/actions/docker-push@main
+        with:
+          image-name: "europe-west1-docker.pkg.dev/internal-platform-api/internal-platform-api/internal-platform-api-backend:${{ github.sha }}"
+
+      - name: Publish Frontend
+        uses: null-pointer-sch/cicd-templates/actions/docker-push@main
+        with:
+          image-name: "europe-west1-docker.pkg.dev/internal-platform-api/internal-platform-api/internal-platform-api-frontend:${{ github.sha }}"
+
+  deploy-image:
+    needs: build-and-publish
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
     uses: null-pointer-sch/cicd-templates/.github/workflows/terraform-deploy.yml@v1.5.0
     with:
