@@ -18,7 +18,8 @@ class Settings(BaseModel):
 
     # Email Configuration
     # EMAIL_MODE can be: "mock_terminal" (logs to stdout), "mock_api" (returns link in API response), or "real" (sends actual email)
-    email_mode: str = os.getenv("EMAIL_MODE", "mock_terminal")
+    # Default to "mock_api" if running in Cloud Run (detected via K_SERVICE) and no mode is set.
+    email_mode: str = os.getenv("EMAIL_MODE", "mock_api" if os.getenv("K_SERVICE") else "mock_terminal")
     require_email_verification: bool = os.getenv("REQUIRE_EMAIL_VERIFICATION", "true").lower() == "true"
     
     # Real Email Settings (SMTP)

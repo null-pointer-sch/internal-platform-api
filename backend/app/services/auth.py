@@ -47,13 +47,14 @@ def register_user(db: Session, user_in: UserCreate) -> str | None:
             existing.verification_token_expires_at = expires_at
             users_repo.update_user(db, existing)
             verification_link = send_verification_email(existing.email, raw_token)
-        # If already verified, we do nothing to prevent enumeration
-        import logging
+        else:
+            # If already verified, we do nothing to prevent enumeration
+            import logging
 
-        logger = logging.getLogger("envctl")
-        logger.info(
-            f"Account {existing.email} is already verified. Generic response returned, no email sent."
-        )
+            logger = logging.getLogger("envctl")
+            logger.info(
+                f"Account {existing.email} is already verified. Generic response returned, no email sent."
+            )
         return verification_link
 
     # New user

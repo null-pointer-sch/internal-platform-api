@@ -97,6 +97,17 @@ def test_login_success(client):
     assert "XSRF-TOKEN" in client.cookies
 
 
+def test_login_unverified(client):
+    register_user(client)
+    # User is registered but not verified by default
+    response = login_user(client)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    data = response.json()
+    assert "verify your email" in data["detail"]
+    assert "verification_url" in data
+    assert data["verification_url"] is not None
+
+
 def test_login_wrong_password(client):
     register_user(client)
     response = login_user(client, password="wrongpassword")

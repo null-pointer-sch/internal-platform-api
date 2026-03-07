@@ -27,6 +27,7 @@ def send_verification_email(email: str, token: str) -> str | None:
         logger.info(f"MOCK EMAIL (TERMINAL): Verification link for {email}")
         logger.info(f"Link: {link}")
         logger.info("==========================================\n")
+        return link
     elif mode == "mock_api":
         logger.info(f"MOCK EMAIL (API): Verification link for {email} prepared for API response.")
         return link
@@ -52,6 +53,7 @@ def send_password_reset_email(email: str, token: str) -> str | None:
         logger.info(f"MOCK EMAIL (TERMINAL): Password reset link for {email}")
         logger.info(f"Link: {link}")
         logger.info("==========================================\n")
+        return link
     elif mode == "mock_api":
         return link
     elif mode == "real":
