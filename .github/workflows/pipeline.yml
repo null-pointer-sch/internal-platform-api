@@ -1,3 +1,4 @@
+# Triggering pipeline with new docker-build-push v1.2.0 auth fix
 name: Pipeline
 
 on:
