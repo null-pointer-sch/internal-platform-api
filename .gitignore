@@ -65,3 +65,4 @@ envctl.db
 *.tfvars.json
 crash.log
 crash.*.log
+secrets.tfvars
