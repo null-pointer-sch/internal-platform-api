@@ -1,4 +1,4 @@
-# Triggering pipeline with v1.3.2 (fixed mutually exclusive WIF/JSON key)
+# Triggering pipeline with v1.4.0 (Simplified WIF-only configuration)
 name: Pipeline
 
 on:
@@ -22,7 +22,7 @@ jobs:
   build-backend:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.3.2
+    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.4.0
     with:
       image-name: "internal-platform-api-backend"
       project-id: "internal-platform-api"
@@ -30,16 +30,14 @@ jobs:
       region: "europe-west1"
       dockerfile-path: "backend/Dockerfile"
       docker-context: "backend"
-      use-wif: ${{ secrets.GCP_CREDENTIALS == '' }}
     secrets:
       GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
       GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   build-frontend:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.3.2
+    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.4.0
     with:
       image-name: "internal-platform-api-frontend"
       project-id: "internal-platform-api"
@@ -47,26 +45,21 @@ jobs:
       region: "europe-west1"
       dockerfile-path: "frontend/Dockerfile"
       docker-context: "frontend"
-      use-wif: ${{ secrets.GCP_CREDENTIALS == '' }}
     secrets:
       GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
       GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-infra:
     needs: [build-backend, build-frontend]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/terraform-deploy.yml@v1.3.2
+    uses: null-pointer-sch/cicd-templates/.github/workflows/terraform-deploy.yml@v1.4.0
     with:
       project-id: "internal-platform-api"
       region: "europe-west1"
       artifact-repo-id: "internal-platform-api"
       image-tag: ${{ github.sha }}
       working-directory: "terraform"
-      use-wif: ${{ secrets.GCP_CREDENTIALS == '' }}
-
     secrets:
       GCP_WIF_PROVIDER: "projects/1062901461072/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
       GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
