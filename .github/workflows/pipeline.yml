@@ -1,4 +1,4 @@
-# Triggering pipeline with new docker-build-push v1.2.0 auth fix
+# Triggering pipeline after fixing WIF IAM permissions for the new repository
 name: Pipeline
 
 on:
