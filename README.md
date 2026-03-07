@@ -1,5 +1,7 @@
 # Internal Developer Platform–Style API 🚀
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=null-pointer-sch_internal-platform-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=null-pointer-sch_internal-platform-api)
+
 A **backend-only API** built with **FastAPI** that explores patterns commonly used in **internal developer platforms** and platform engineering teams.
 
 The API manages **projects**, **environments**, and **deployments**, inspired by tools such as Heroku, Render, Backstage, Humanitec, and custom internal PaaS solutions.
