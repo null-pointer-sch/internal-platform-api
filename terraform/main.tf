@@ -32,7 +32,7 @@ import {
 
 import {
   to = module.backend.google_cloud_run_v2_service.service
-  id = "projects/internal-platform-api/locations/europe-west1/services/internal-platform-api-backend"
+  id = "projects/internal-platform-api/locations/europe-west1/services/internal-platform-api"
 }
 
 # Backend Cloud Run via GitHub Module
@@ -65,7 +65,7 @@ module "frontend" {
   container_port = 80
   is_public      = true
 
-  cpu_limit          = "0.5"
+  cpu_limit          = "1"
   memory_limit       = "256Mi"
   min_instance_count = 0
   max_instance_count = 5
