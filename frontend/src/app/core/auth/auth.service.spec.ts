@@ -12,8 +12,7 @@ describe('AuthService', () => {
 
     const mockUser: User = {
         id: '123',
-        email: 'test@example.com',
-        username: 'testuser'
+        email: 'test@example.com'
     };
 
     beforeEach(() => {
