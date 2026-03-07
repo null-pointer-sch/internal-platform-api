@@ -69,7 +69,3 @@ secrets.tfvars
 
 # AI
 AI_CONTEXT.md
-
-# SonarCloud
-sonar-project.properties
-sonar-scanner.properties
