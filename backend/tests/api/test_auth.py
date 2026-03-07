@@ -18,11 +18,26 @@ def login_user(client, email="test@example.com", password="testpassword123"):
 
 
 def auth_headers(client, email="test@example.com", password="testpassword123"):
-    """Register + login and return Authorization headers."""
+    """Register + login and set context in client for subsequents requests."""
+    from app.core.database import get_db
+    from app.main import app
+    from app.repositories.users import get_user_by_email
+
+    # Clear to ensure we are testing a fresh session
+    client.cookies.clear()
+
     register_user(client, email, password)
-    resp = login_user(client, email, password)
-    token = resp.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+    
+    # Manually verify the user so login succeeds
+    db_gen = app.dependency_overrides.get(get_db, get_db)()
+    db = next(db_gen)
+    user = get_user_by_email(db, email)
+    user.is_verified = True
+    db.commit()
+
+    login_user(client, email, password)
+    xsrf_token = client.cookies.get("XSRF-TOKEN")
+    return {"X-XSRF-TOKEN": xsrf_token} if xsrf_token else {}
 
 
 # ─── Registration ───
@@ -30,18 +45,17 @@ def auth_headers(client, email="test@example.com", password="testpassword123"):
 
 def test_register_success(client):
     response = register_user(client)
-    assert response.status_code == status.HTTP_201_CREATED
+    assert response.status_code == status.HTTP_202_ACCEPTED
     data = response.json()
-    assert data["email"] == "test@example.com"
-    assert "id" in data
-    assert "created_at" in data
+    assert "verification link has been sent" in data["detail"]
 
 
 def test_register_duplicate_email(client):
     register_user(client)
     response = register_user(client)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "already registered" in response.json()["detail"].lower()
+    # The new implementation returns 202 even for duplicates to prevent email enumeration
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert "If the email can be registered" in response.json()["detail"]
 
 
 def test_register_invalid_email(client):
@@ -64,12 +78,23 @@ def test_register_short_password(client):
 
 
 def test_login_success(client):
+    from app.core.database import get_db
+    from app.main import app
+    from app.repositories.users import get_user_by_email
+    
     register_user(client)
+    
+    db_gen = app.dependency_overrides.get(get_db, get_db)()
+    db = next(db_gen)
+    user = get_user_by_email(db, "test@example.com")
+    user.is_verified = True
+    db.commit()
+
     response = login_user(client)
     assert response.status_code == status.HTTP_200_OK
-    data = response.json()
-    assert "access_token" in data
-    assert data["token_type"] == "bearer"
+    assert "Successfully logged in" in response.json()["detail"]
+    assert "envctl-session" in client.cookies
+    assert "XSRF-TOKEN" in client.cookies
 
 
 def test_login_wrong_password(client):

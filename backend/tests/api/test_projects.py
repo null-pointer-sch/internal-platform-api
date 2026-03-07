@@ -73,17 +73,18 @@ def test_get_project_not_found(client):
 
 def test_project_isolation(client):
     """User A cannot see User B's projects."""
+    # Step 1: Login User A and create project
     headers_a = auth_headers(client, email="a@example.com")
-    headers_b = auth_headers(client, email="b@example.com")
-
     create_project(client, headers_a, "A's Project")
 
-    # User B should see an empty list
+    # Step 2: Login User B and verify they see nothing
+    headers_b = auth_headers(client, email="b@example.com")
     response = client.get("/api/v1/projects/", headers=headers_b)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0
 
-    # User A should see their project
+    # Step 3: Switch back to User A and verify they see their project
+    headers_a = auth_headers(client, email="a@example.com")
     response = client.get("/api/v1/projects/", headers=headers_a)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 1
