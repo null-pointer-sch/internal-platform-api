@@ -13,14 +13,14 @@ permissions:
 
 jobs:
   test:
-    uses: AndySchubert/cicd-templates/.github/workflows/python-ci.yml@main
+    uses: null-pointer-sch/cicd-templates/.github/workflows/python-ci.yml@main
     with:
       python-version: "3.12"
 
   build-image:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: AndySchubert/cicd-templates/.github/workflows/docker-build-push.yml@main
+    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@main
     with:
       image-name: "internal-platform-api"
       project-id: "internal-platform-api"
@@ -33,7 +33,7 @@ jobs:
   deploy-infra:
     needs: build-image
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: AndySchubert/cicd-templates/.github/workflows/terraform-deploy.yml@main
+    uses: null-pointer-sch/cicd-templates/.github/workflows/terraform-deploy.yml@main
     with:
       project-id: "internal-platform-api"
       region: "europe-west1"
