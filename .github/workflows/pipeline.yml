@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/pytest
+      - feature/frontend
 
 permissions:
   contents: read
@@ -18,7 +19,7 @@ jobs:
 
   build-image:
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
     uses: AndySchubert/cicd-templates/.github/workflows/docker-build-push.yml@main
     with:
       image-name: "internal-platform-api"
@@ -31,7 +32,7 @@ jobs:
 
   deploy-infra:
     needs: build-image
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
     uses: AndySchubert/cicd-templates/.github/workflows/terraform-deploy.yml@main
     with:
       project-id: "internal-platform-api"
