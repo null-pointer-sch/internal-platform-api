@@ -1,5 +1,3 @@
-import os
-import pytest
 from app.core.config import Settings
 
 def test_frontend_url_default():
