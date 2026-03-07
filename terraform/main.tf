@@ -25,16 +25,6 @@ module "artifact_repo" {
   ]
 }
 
-import {
-  to = module.artifact_repo.google_artifact_registry_repository.repo
-  id = "projects/internal-platform-api/locations/europe-west1/repositories/internal-platform-api-eu"
-}
-
-import {
-  to = module.backend.google_cloud_run_v2_service.service
-  id = "projects/internal-platform-api/locations/europe-west1/services/internal-platform-api"
-}
-
 # Backend Cloud Run via GitHub Module
 module "backend" {
   source = "git::https://github.com/null-pointer-sch/cicd-templates.git//modules/google-cloud-run?ref=v1.0.0"
