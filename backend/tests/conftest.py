@@ -1,4 +1,11 @@
 import pytest
+import warnings
+
+# Suppress 3rd party deprecation warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="passlib")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="argon2")
+# Broaden to include passlib's internal argon2 handling
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*argon2.*")
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

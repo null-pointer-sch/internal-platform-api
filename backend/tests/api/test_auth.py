@@ -63,7 +63,7 @@ def test_register_invalid_email(client):
         "/api/v1/auth/register",
         json={"email": "not-an-email", "password": "testpassword123"},
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_register_short_password(client):
@@ -71,7 +71,7 @@ def test_register_short_password(client):
         "/api/v1/auth/register",
         json={"email": "test@example.com", "password": "short"},
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 # ─── Login ───
