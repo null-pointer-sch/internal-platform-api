@@ -47,6 +47,12 @@ async def lifespan(app: FastAPI):
 
             with SessionLocal() as db:
                 seed_db(db)
+            
+            logger.info("==========================================")
+            logger.info(f"APP_ENV: {settings.app_env}")
+            logger.info(f"EMAIL_MODE: {settings.email_mode}")
+            logger.info(f"REQUIRE_EMAIL_VERIFICATION: {settings.require_email_verification}")
+            logger.info("==========================================")
             break
         except OperationalError as e:
             if attempt < max_retries - 1:

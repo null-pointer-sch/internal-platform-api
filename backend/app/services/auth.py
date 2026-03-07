@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.session import Session as SessionModel
 from app.schemas.user import UserCreate
 from app.services.email import send_verification_email
+from app.core.config import settings
 
 import app.repositories.users as users_repo
 import app.repositories.sessions as sessions_repo
@@ -30,43 +31,49 @@ def register_user(db: Session, user_in: UserCreate) -> str | None:
     """
     Register a user. If they already exist, we silently do nothing or resend email.
     To prevent enumeration, we always return generic success from the API.
-    Returns the verification link if in mock_api mode.
+    Returns the verification link if in mock modes.
     """
-    existing = users_repo.get_user_by_email(db, user_in.email)
+    email = user_in.email.lower().strip()
+    existing = users_repo.get_user_by_email(db, email)
 
+    verification_link = None
+    
+    # If user exists, we decide whether to resend verification
+    if existing:
+        if not existing.is_verified and settings.require_email_verification:
+            # Resend/Update verification token
+            raw_token = generate_random_token()
+            existing.verification_token_hash = hash_token(raw_token)
+            existing.verification_token_expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+            users_repo.update_user(db, existing)
+            verification_link = send_verification_email(existing.email, raw_token)
+        elif existing.is_verified:
+            import logging
+            logger = logging.getLogger("envctl")
+            logger.info(f"Registration attempt for already verified account: {email}. Silently ignoring.")
+        
+        return verification_link
+
+    # New user
     raw_token = generate_random_token()
     token_hash = hash_token(raw_token)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
-    verification_link = None
+    # If verification is NOT required, we can auto-verify them immediately
+    is_verified = not settings.require_email_verification
 
-    if existing:
-        # If user exists but is not verified, we can resend the email.
-        if not existing.is_verified:
-            existing.verification_token_hash = token_hash
-            existing.verification_token_expires_at = expires_at
-            users_repo.update_user(db, existing)
-            verification_link = send_verification_email(existing.email, raw_token)
-        else:
-            # If already verified, we do nothing to prevent enumeration
-            import logging
-
-            logger = logging.getLogger("envctl")
-            logger.info(
-                f"Account {existing.email} is already verified. Generic response returned, no email sent."
-            )
-        return verification_link
-
-    # New user
     user = User(
-        email=user_in.email,
+        email=email,
         password_hash=hash_password(user_in.password),
-        is_verified=False,
-        verification_token_hash=token_hash,
-        verification_token_expires_at=expires_at,
+        is_verified=is_verified,
+        verification_token_hash=None if is_verified else token_hash,
+        verification_token_expires_at=None if is_verified else expires_at,
     )
     users_repo.create_user(db, user)
-    verification_link = send_verification_email(user.email, raw_token)
+    
+    if not is_verified:
+        verification_link = send_verification_email(user.email, raw_token)
+        
     return verification_link
 
 
@@ -97,7 +104,8 @@ def authenticate_user(
     """
     Authenticate user, enforce lockouts, return (User, raw_session_id, verification_link) if successful.
     """
-    user = users_repo.get_user_by_email(db, email)
+    normalized_email = email.lower().strip()
+    user = users_repo.get_user_by_email(db, normalized_email)
 
     if not user:
         return None, None, None
@@ -117,8 +125,8 @@ def authenticate_user(
         users_repo.update_user(db, user)
         return None, None, None
 
-    # Check Verified Status (Must be verified to login)
-    if not user.is_verified:
+    # Check Verified Status (Must be verified to login if required)
+    if settings.require_email_verification and not user.is_verified:
         # Securely resend verification email on correct password for unverified account
         raw_token = generate_random_token()
         user.verification_token_hash = hash_token(raw_token)

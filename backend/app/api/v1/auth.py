@@ -44,7 +44,9 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     
     detail = "If the email can be registered, a verification link has been sent."
     if settings.email_mode == "mock_terminal":
-        detail += " Device Notice: Since this is a local environment, the link was printed to your terminal."
+        detail += " Dev Mode: The verification link was printed to the server terminal."
+    elif settings.email_mode == "mock_api" and verification_url:
+        detail += " Dev Mode: No real email was sent. Use the link below to verify."
     
     return RegisterResponse(
         detail=detail,
@@ -78,7 +80,9 @@ def login(
         # Password was correct but email not verified
         detail = "Please verify your email before logging in."
         if settings.email_mode == "mock_terminal":
-            detail += " The verification link has been printed to the server terminal."
+            detail += " Dev Mode: The verification link was printed to the server terminal."
+        elif settings.email_mode == "mock_api":
+            detail += " Dev Mode: No real email was sent. Use the link below to verify."
         
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
