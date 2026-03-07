@@ -1,4 +1,4 @@
-# Triggering pipeline after fixing WIF IAM permissions for the new repository
+# Triggering pipeline after fixing Artifact Registry repository name and IAM permissions
 name: Pipeline
 
 on:
