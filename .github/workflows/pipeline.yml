@@ -1,4 +1,4 @@
-# Triggering pipeline after fixing Artifact Registry repository name and IAM permissions
+# Triggering pipeline with v1.3.1 (mutually exclusive WIF/JSON key fix)
 name: Pipeline
 
 on:
@@ -22,7 +22,7 @@ jobs:
   build-backend:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.3.0
+    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.3.1
     with:
       image-name: "internal-platform-api-backend"
       project-id: "internal-platform-api"
@@ -38,7 +38,7 @@ jobs:
   build-frontend:
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
-    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.3.0
+    uses: null-pointer-sch/cicd-templates/.github/workflows/docker-build-push.yml@v1.3.1
     with:
       image-name: "internal-platform-api-frontend"
       project-id: "internal-platform-api"
