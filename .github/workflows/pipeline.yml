@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - main
-      - feature/pytest
-      - feature/frontend
+      - feature/fix-cloud-env
 
 permissions:
   contents: read
@@ -21,7 +20,7 @@ env:
 
 jobs:
   deploy:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend' || github.ref == 'refs/heads/feature/fix-cloud-env')
     runs-on: ubuntu-latest
     steps:
       # 1. Checkout & Setup
