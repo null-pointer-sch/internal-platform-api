@@ -247,3 +247,32 @@ jobs:
         run: |
           cd backend
           poetry run python ../scripts/smoke_frontend.py
+
+  smoke-e2e:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        shell: bash
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "/home/runner/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Dependencies
+        working-directory: backend
+        run: poetry install
+
+      - name: Smoke Test E2E
+        env:
+          FRONTEND_URL: ${{ needs.deploy.outputs.frontend_url }}
+        run: |
+          cd backend
+          poetry run python ../scripts/smoke_e2e.py
