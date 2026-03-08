@@ -112,8 +112,7 @@ curl -s -X POST http://localhost:8000/api/v1/projects/ \
 ├── backend/            # FastAPI Backend (Python 3.12, SQLAlchemy, Pydantic)
 ├── frontend/           # Angular Frontend (Standalone Components, Signals)
 ├── terraform/          # Infrastructure as Code (GCP Cloud Run)
-├── scripts/            # E2E Smoke Testing Suite
-└── scripts/            # CI/CD Python utilities
+├── scripts/            # E2E Smoke Testing Suite & CI/CD utilities
 ```
 
 ---
