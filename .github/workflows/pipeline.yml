@@ -19,7 +19,7 @@ env:
   GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
 
 jobs:
-  validate:
+  test:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/fix-cloud-env')
     runs-on: ubuntu-latest
     steps:
@@ -121,7 +121,7 @@ jobs:
           wait
 
   deploy:
-    needs: [validate, dockerize]
+    needs: [test, dockerize]
     runs-on: ubuntu-latest
     outputs:
       backend_url: ${{ steps.get_urls.outputs.backend_url }}
