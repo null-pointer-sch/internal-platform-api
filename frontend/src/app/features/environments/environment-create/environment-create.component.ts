@@ -23,13 +23,13 @@ export class EnvironmentCreateComponent implements OnInit {
   showTtl = false;
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private environmentsService: EnvironmentsService,
-    private projectsService: ProjectsService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly fb: FormBuilder,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly environmentsService: EnvironmentsService,
+    private readonly projectsService: ProjectsService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.environmentForm = this.fb.group({
       name: ['', [Validators.required]],

@@ -18,9 +18,9 @@ export class ProjectListComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private projectsService: ProjectsService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly projectsService: ProjectsService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {

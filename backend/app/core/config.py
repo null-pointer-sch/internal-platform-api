@@ -30,7 +30,7 @@ class Settings(BaseModel):
     smtp_host: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port: int = int(os.getenv("SMTP_PORT", "587"))
     smtp_user: str = os.getenv("SMTP_USER", "")
-    smtp_password: str = os.getenv("SMTP_PASSWORD", "")  # Note: smtp_password was using SMTP_USER env var? Likely a bug in previous edit, fixing to SMTP_PASSWORD
+    smtp_password: str = os.getenv("SMTP_PASSWORD", "")
     smtp_from: str = os.getenv("SMTP_FROM", "noreply@envctl.com")
 
 

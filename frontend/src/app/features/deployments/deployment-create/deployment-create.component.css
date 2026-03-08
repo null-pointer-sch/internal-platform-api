@@ -10,11 +10,11 @@
   align-items: center;
   margin-bottom: 16px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .breadcrumb a {
-  color: #667eea;
+  color: var(--primary-color);
   text-decoration: none;
 }
 
@@ -23,19 +23,19 @@
 }
 
 .breadcrumb span {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 h1 {
   margin: 0 0 32px 0;
   font-size: 32px;
-  color: #333;
+  color: var(--text-main);
   font-weight: 600;
 }
 
 .deployment-form {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 32px;
 }
@@ -47,7 +47,7 @@ h1 {
 label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-main);
   font-weight: 500;
   font-size: 14px;
 }
@@ -55,7 +55,7 @@ label {
 .form-control {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   box-sizing: border-box;
@@ -65,23 +65,23 @@ label {
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
 }
 
 .form-control.error {
-  border-color: #e74c3c;
+  border-color: var(--error-color);
 }
 
 .form-hint {
   display: block;
   margin-top: 4px;
-  color: #666;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
 .error-message {
-  color: #e74c3c;
+  color: var(--error-color);
   font-size: 12px;
   margin-top: 4px;
 }
@@ -93,9 +93,9 @@ label {
 }
 
 .alert-error {
-  background-color: #fee;
-  color: #c33;
-  border: 1px solid #fcc;
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border: 1px solid var(--error-border);
 }
 
 .alert-warning {
@@ -122,12 +122,12 @@ label {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: var(--primary-hover);
 }
 
 .btn-primary:disabled {
@@ -136,13 +136,13 @@ label {
 }
 
 .btn-secondary {
-  background-color: #f5f5f5;
-  color: #666;
-  border: 1px solid #ddd;
+  background-color: var(--bg-color);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #e8e8e8;
+  background-color: #e2e8f0;
 }
 
 .btn-secondary:disabled {

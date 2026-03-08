@@ -21,12 +21,12 @@ export class LoginComponent implements OnInit {
   isDevelopment = !environment.production;
 
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly fb: FormBuilder,
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -79,11 +79,4 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  loginAsAdmin(): void {
-    this.loginForm.patchValue({
-      email: 'admin@envctl.dev',
-      password: 'adminpassword'
-    });
-    this.onSubmit();
-  }
 }

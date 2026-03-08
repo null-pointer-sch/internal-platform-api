@@ -26,12 +26,12 @@ export interface RegisterResponse {
 })
 export class AuthService {
   // undefined means we haven't checked yet. null means unauthenticated.
-  private currentUserSubject = new BehaviorSubject<User | null | undefined>(undefined);
+  private readonly currentUserSubject = new BehaviorSubject<User | null | undefined>(undefined);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(
-    private http: HttpClient,
-    private router: Router
+    private readonly http: HttpClient,
+    private readonly router: Router
   ) {
     // Attempt to load session on startup
     this.loadCurrentUser().subscribe();

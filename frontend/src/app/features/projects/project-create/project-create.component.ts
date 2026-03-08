@@ -18,11 +18,11 @@ export class ProjectCreateComponent {
   error: string | null = null;
 
   constructor(
-    private fb: FormBuilder,
-    private projectsService: ProjectsService,
-    private router: Router,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly fb: FormBuilder,
+    private readonly projectsService: ProjectsService,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.projectForm = this.fb.group({
       name: ['', [Validators.required]],

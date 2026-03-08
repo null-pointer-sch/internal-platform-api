@@ -19,8 +19,8 @@ class InvalidOperationException(Exception):
         super().__init__(self.detail)
 
 
-async def resource_not_found_exception_handler(
-    request: Request, exc: ResourceNotFoundException
+def resource_not_found_exception_handler(
+    _: Request, exc: ResourceNotFoundException
 ):
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -28,8 +28,8 @@ async def resource_not_found_exception_handler(
     )
 
 
-async def invalid_operation_exception_handler(
-    request: Request, exc: InvalidOperationException
+def invalid_operation_exception_handler(
+    _: Request, exc: InvalidOperationException
 ):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -37,7 +37,7 @@ async def invalid_operation_exception_handler(
     )
 
 
-async def global_exception_handler(request: Request, exc: Exception):
+def global_exception_handler(_: Request, exc: Exception):
     logger.error(f"Global exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -45,14 +45,14 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+def http_exception_handler(_: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
     )
 
 
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+def validation_exception_handler(_: Request, exc: RequestValidationError):
     logger.error(f"Validation error: {exc.errors()}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

@@ -25,12 +25,12 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
   private pollingSubscription: any;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private environmentsService: EnvironmentsService,
-    private projectsService: ProjectsService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly environmentsService: EnvironmentsService,
+    private readonly projectsService: ProjectsService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {

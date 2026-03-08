@@ -25,12 +25,12 @@ export class DeploymentListComponent implements OnInit, OnDestroy {
   private pollingSubscription: any;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private deploymentsService: DeploymentsService,
-    private environmentsService: EnvironmentsService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly deploymentsService: DeploymentsService,
+    private readonly environmentsService: EnvironmentsService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {

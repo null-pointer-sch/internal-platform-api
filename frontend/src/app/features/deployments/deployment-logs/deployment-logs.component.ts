@@ -27,7 +27,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
     ]
 })
 export class DeploymentLogsComponent implements OnInit, OnDestroy {
-    @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
+    @ViewChild('scrollContainer') private readonly scrollContainer!: ElementRef;
 
     envId: string | null = null;
     depId: string | null = null;
@@ -49,10 +49,10 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
     private pollSubscription?: Subscription;
 
     constructor(
-        private route: ActivatedRoute,
-        private deploymentsService: DeploymentsService,
-        private ngZone: NgZone,
-        private cdr: ChangeDetectorRef
+        private readonly route: ActivatedRoute,
+        private readonly deploymentsService: DeploymentsService,
+        private readonly ngZone: NgZone,
+        private readonly cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {

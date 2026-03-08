@@ -60,11 +60,11 @@ export class VerifyEmailComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private route: ActivatedRoute,
-    private authService: AuthService,
-    private router: Router,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly route: ActivatedRoute,
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {

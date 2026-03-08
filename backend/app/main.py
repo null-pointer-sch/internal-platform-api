@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
-import time
+import asyncio
 import logging
 
 from app.core.config import settings
@@ -29,6 +29,7 @@ from app.core.exceptions import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("envctl")
+API_V1_PREFIX = "/api/v1"
 
 
 @asynccontextmanager
@@ -60,7 +61,7 @@ async def lifespan(app: FastAPI):
                 logger.warning(
                     f"DB connection failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {retry_delay} seconds..."
                 )
-                time.sleep(retry_delay)
+                await asyncio.sleep(retry_delay)
             else:
                 logger.error("Max retries reached. Could not connect to database.")
                 raise
@@ -121,10 +122,10 @@ app.add_exception_handler(
     InvalidOperationException, invalid_operation_exception_handler
 )
 
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(projects_router, prefix="/api/v1")
-app.include_router(environments_router, prefix="/api/v1")
-app.include_router(deployments_router, prefix="/api/v1")
+app.include_router(auth_router, prefix=API_V1_PREFIX)
+app.include_router(projects_router, prefix=API_V1_PREFIX)
+app.include_router(environments_router, prefix=API_V1_PREFIX)
+app.include_router(deployments_router, prefix=API_V1_PREFIX)
 
 
 @app.get("/health")

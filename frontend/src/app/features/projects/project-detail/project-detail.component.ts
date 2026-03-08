@@ -19,11 +19,11 @@ export class ProjectDetailComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private projectsService: ProjectsService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly projectsService: ProjectsService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {

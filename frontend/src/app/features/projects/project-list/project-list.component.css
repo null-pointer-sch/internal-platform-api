@@ -14,7 +14,7 @@
 h1 {
   margin: 0;
   font-size: 32px;
-  color: #333;
+  color: var(--text-main);
   font-weight: 600;
 }
 
@@ -31,12 +31,12 @@ h1 {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--primary-hover);
 }
 
 .loading-container {
@@ -52,9 +52,9 @@ h1 {
 }
 
 .alert-error {
-  background-color: #fee;
-  color: #c33;
-  border: 1px solid #fcc;
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border: 1px solid var(--error-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -62,7 +62,7 @@ h1 {
 
 .btn-retry {
   padding: 6px 12px;
-  background-color: #e74c3c;
+  background-color: var(--error-color);
   color: white;
   border: none;
   border-radius: 4px;
@@ -73,7 +73,7 @@ h1 {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .projects-grid {
@@ -83,8 +83,8 @@ h1 {
 }
 
 .project-card {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 24px;
   transition: box-shadow 0.3s;
@@ -107,19 +107,19 @@ h1 {
 }
 
 .project-header h3 a {
-  color: #333;
+  color: var(--text-main);
   text-decoration: none;
 }
 
 .project-header h3 a:hover {
-  color: #667eea;
+  color: var(--primary-color);
 }
 
 .btn-delete {
   background: none;
   border: none;
   font-size: 24px;
-  color: #999;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0;
   width: 24px;
@@ -129,12 +129,12 @@ h1 {
 }
 
 .btn-delete:hover {
-  background-color: #fee;
-  color: #e74c3c;
+  background-color: var(--error-bg);
+  color: var(--error-color);
 }
 
 .project-description {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 16px 0;
   font-size: 14px;
   line-height: 1.5;
@@ -145,16 +145,16 @@ h1 {
   justify-content: space-between;
   align-items: center;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .project-date {
-  color: #999;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
 .btn-link {
-  color: #667eea;
+  color: var(--primary-color);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;

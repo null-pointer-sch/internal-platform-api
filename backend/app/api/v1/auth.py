@@ -1,5 +1,6 @@
 # app/api/v1/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -15,7 +16,7 @@ from app.core.config import settings
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+def get_current_user(request: Request, db: Annotated[Session, Depends(get_db)]) -> User:
     session_id = request.cookies.get("envctl-session")
     if not session_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
@@ -29,7 +30,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_202_ACCEPTED)
-def register(user_in: UserCreate, db: Session = Depends(get_db)):
+def register(user_in: UserCreate, db: Annotated[Session, Depends(get_db)]):
     verification_url = auth_service.register_user(db, user_in)
     
     detail = "If the account exists and requires verification, verification instructions have been prepared."
@@ -47,7 +48,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/verify-email")
-def verify_email(req: VerifyTokenRequest, db: Session = Depends(get_db)):
+def verify_email(req: VerifyTokenRequest, db: Annotated[Session, Depends(get_db)]):
     success = auth_service.verify_email_token(db, req.token)
     if not success:
         raise HTTPException(
@@ -58,7 +59,11 @@ def verify_email(req: VerifyTokenRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(
+    response: Response,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[Session, Depends(get_db)],
+):
     user, session_id, verification_url = auth_service.authenticate_user(db, form_data.username, form_data.password)
     
     if verification_url:
@@ -110,7 +115,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
 
 
 @router.post("/logout")
-def logout(request: Request, response: Response, db: Session = Depends(get_db)):
+def logout(request: Request, response: Response, db: Annotated[Session, Depends(get_db)]):
     session_id = request.cookies.get("envctl-session")
     if session_id:
         auth_service.revoke_session(db, session_id)
@@ -121,7 +126,7 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserRead)
-def read_me(current_user: User = Depends(get_current_user)):
+def read_me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
 
 

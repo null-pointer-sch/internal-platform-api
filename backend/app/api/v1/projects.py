@@ -1,5 +1,6 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, status
+from typing import Annotated
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -13,8 +14,8 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 @router.get("", response_model=list[ProjectRead])
 def list_projects(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     return projects_service.get_projects_for_user(db, current_user.id)
 
@@ -22,8 +23,8 @@ def list_projects(
 @router.post("", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
 def create_project(
     project_in: ProjectCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     import logging
 
@@ -35,8 +36,8 @@ def create_project(
 @router.get("/{project_id}", response_model=ProjectRead)
 def get_project(
     project_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     return projects_service.get_project_by_id_for_user(db, project_id, current_user.id)
 
@@ -44,7 +45,7 @@ def get_project(
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project(
     project_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     projects_service.delete_project_for_user(db, project_id, current_user.id)

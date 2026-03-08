@@ -9,9 +9,9 @@ import { Environment, EnvironmentCreate } from '../../shared/models/environment.
   providedIn: 'root'
 })
 export class EnvironmentsService {
-  private apiUrl = `${environment.apiUrl}/api/v1/environments`;
+  private readonly apiUrl = `${environment.apiUrl}/api/v1/environments`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getEnvironments(projectId: string): Observable<Environment[]> {
     return this.http.get<Environment[]>(`${this.apiUrl}/projects/${projectId}`);
