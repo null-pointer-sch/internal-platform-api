@@ -97,20 +97,24 @@ export class DeploymentListComponent implements OnInit, OnDestroy {
     this.pollingSubscription = this.deploymentsService.pollDeployments(this.environmentId).subscribe({
       next: (deployments) => {
         this.ngZone.run(() => {
-          // Only update if statuses changed
-          const hasChanges = this.deployments.some((dep) => {
-            const newDep = deployments.find(d => d.id === dep.id);
-            return newDep && newDep.status !== dep.status;
-          });
-          if (hasChanges) {
-            this.deployments = deployments;
-            this.cdr.detectChanges();
-          }
+          this.updateDeploymentsIfChanged(deployments);
         });
       },
       error: () => {
         // Silently fail polling
       }
     });
+  }
+
+  private updateDeploymentsIfChanged(newDeployments: Deployment[]): void {
+    const hasChanges = this.deployments.some((dep) => {
+      const newDep = newDeployments.find(d => d.id === dep.id);
+      return newDep && newDep.status !== dep.status;
+    });
+
+    if (hasChanges) {
+      this.deployments = newDeployments;
+      this.cdr.detectChanges();
+    }
   }
 }

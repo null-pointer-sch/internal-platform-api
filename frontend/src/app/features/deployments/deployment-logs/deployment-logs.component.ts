@@ -79,7 +79,7 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
         const text = this.activeTab === 'deployment' ? this.deploymentLogs : this.appLogs;
         if (!this.searchQuery) return this.escapeHtml(text);
 
-        const escapedSearch = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedSearch = this.searchQuery.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
         const regex = new RegExp(`(${escapedSearch})`, 'gi');
 
         const lines = text.split('\n');
@@ -92,7 +92,7 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
         return filteredLines
             .map(line => {
                 const escapedLine = this.escapeHtml(line);
-                return escapedLine.replace(regex, '<span class="highlight">$1</span>');
+                return escapedLine.replaceAll(regex, '<span class="highlight">$1</span>');
             })
             .join('\n');
     }
@@ -135,12 +135,12 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
         }
 
         try {
-            const escapedSearch = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const escapedSearch = this.searchQuery.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
             const regex = new RegExp(escapedSearch, 'gi');
             const matches = text.match(regex);
             this.matchesCount = matches ? matches.length : 0;
-            this.currentMatchIndex = matches ? 0 : 0;
-        } catch (e) {
+            this.currentMatchIndex = 0;
+        } catch (ignored) {
             this.matchesCount = 0;
         }
     }

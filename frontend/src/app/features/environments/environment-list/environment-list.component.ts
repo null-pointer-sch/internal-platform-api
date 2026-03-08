@@ -95,21 +95,25 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
     this.pollingSubscription = this.environmentsService.pollEnvironments(this.projectId).subscribe({
       next: (environments) => {
         this.ngZone.run(() => {
-          // Only update if statuses changed
-          const hasChanges = this.environments.some((env) => {
-            const newEnv = environments.find(e => e.id === env.id);
-            return newEnv && newEnv.status !== env.status;
-          });
-          if (hasChanges) {
-            this.environments = environments;
-            this.cdr.detectChanges();
-          }
+          this.updateEnvironmentsIfChanged(environments);
         });
       },
       error: () => {
         // Silently fail polling
       }
     });
+  }
+
+  private updateEnvironmentsIfChanged(newEnvironments: Environment[]): void {
+    const hasChanges = this.environments.some((env) => {
+      const newEnv = newEnvironments.find(e => e.id === env.id);
+      return newEnv && newEnv.status !== env.status;
+    });
+
+    if (hasChanges) {
+      this.environments = newEnvironments;
+      this.cdr.detectChanges();
+    }
   }
 
   deleteEnvironment(id: string): void {
