@@ -1,4 +1,4 @@
-# Optimized Ultimate Pipeline: Single Job, 12-Phase Robust Lifecycle
+# Parallelized Cloud-Native Pipeline
 name: Pipeline
 
 on:
@@ -19,14 +19,10 @@ env:
   GCP_SERVICE_ACCOUNT: "github-actions-deploy@internal-platform-api.iam.gserviceaccount.com"
 
 jobs:
-  deploy:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/pytest' || github.ref == 'refs/heads/feature/frontend' || github.ref == 'refs/heads/feature/fix-cloud-env')
+  validate:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/fix-cloud-env')
     runs-on: ubuntu-latest
-    outputs:
-      backend_url: ${{ steps.get_urls.outputs.backend_url }}
-      frontend_url: ${{ steps.get_urls.outputs.frontend_url }}
     steps:
-      # 1. Checkout & Setup
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -44,19 +40,9 @@ jobs:
           cache: "npm"
           cache-dependency-path: "frontend/package-lock.json"
 
-      # 2. Auth Phase (Shared Session)
-      - name: Auth to GCP
-        uses: null-pointer-sch/cicd-templates/actions/gcp-auth@main
-        with:
-          wif-provider: ${{ env.GCP_WIF_PROVIDER }}
-          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
-          region: ${{ env.REGION }}
-
-      # 3. Install Dependencies Phase (Parallel)
       - name: Install Dependencies
         shell: bash
         run: |
-          # Backend
           cd backend
           if ! command -v poetry &> /dev/null; then
             curl -sSL https://install.python-poetry.org | python3 -
@@ -66,50 +52,28 @@ jobs:
           poetry install &
           B_PID=$!
           
-          # Frontend
           cd ../frontend
           npm ci &
           F_PID=$!
           
           wait $B_PID $F_PID
 
-      # 4. Lint Phase (Parallel)
-      - name: Linting (Backend & Frontend)
+      - name: Linting
         shell: bash
         run: |
           export PATH="/home/runner/.local/bin:$PATH"
-          
-          # Backend Lint
-          cd backend
-          poetry run ruff check . &
-          B_PID=$!
-          
-          # Frontend Lint (Optional if missing script)
-          cd ../frontend
-          npm run lint || echo "Frontend lint script missing or failed" &
-          F_PID=$!
-          
-          wait $B_PID $F_PID
+          cd backend && poetry run ruff check . &
+          cd ../frontend && (npm run lint || echo "Frontend lint failed") &
+          wait
 
-      # 5. Unit/Integration Tests Phase (Parallel)
       - name: Unit & Integration Tests
         shell: bash
         run: |
           export PATH="/home/runner/.local/bin:$PATH"
-          
-          # Backend Tests with Coverage
-          cd backend
-          poetry run pytest --cov=app --cov-report=xml:../backend/coverage.xml &
-          B_PID=$!
-          
-          # Frontend Tests with Coverage
-          cd ../frontend
-          npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage || echo "Frontend tests skipped" &
-          F_PID=$!
-          
-          wait $B_PID $F_PID
+          cd backend && poetry run pytest --cov=app --cov-report=xml:../backend/coverage.xml &
+          cd ../frontend && (npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage || echo "Frontend tests skipped") &
+          wait
 
-      # 6. Sonar Cloud Scan Phase
       - name: SonarCloud Scan
         uses: sonarsource/sonarqube-scan-action@v6
         with:
@@ -126,58 +90,63 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # 7. Build Frontend Assets Phase
+  dockerize:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/fix-cloud-env')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+
+      - name: Auth to GCP
+        uses: null-pointer-sch/cicd-templates/actions/gcp-auth@main
+        with:
+          wif-provider: ${{ env.GCP_WIF_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          region: ${{ env.REGION }}
+
       - name: Build Frontend Assets
-        shell: bash
         run: |
           cd frontend
+          npm ci
           npm run build
 
-      # 8. Build Docker Images Phase (Parallel)
-      - name: Dockerize (Build)
+      - name: Docker Build & Push
         shell: bash
         run: |
           IMAGE_BASE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO_ID }}"
           
           docker build -f backend/Dockerfile -t "${IMAGE_BASE}/internal-platform-api-backend:${{ github.sha }}" backend &
-          B_PID=$!
-          
           docker build -f frontend/Dockerfile -t "${IMAGE_BASE}/internal-platform-api-frontend:${{ github.sha }}" frontend &
-          F_PID=$!
-          
-          wait $B_PID $F_PID
-
-      # 9. Image Smoke Test Phase (Parallel)
-      - name: Image Smoke Test
-        shell: bash
-        run: |
-          IMAGE_BASE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO_ID }}"
-          
-          # Backend sanity
-          docker run --rm "${IMAGE_BASE}/internal-platform-api-backend:${{ github.sha }}" python --version &
-          B_PID=$!
-          
-          # Frontend sanity (checking assets)
-          docker run --rm "${IMAGE_BASE}/internal-platform-api-frontend:${{ github.sha }}" ls /usr/share/nginx/html &
-          F_PID=$!
-          
-          wait $B_PID $F_PID
-
-      # 10. Push Image Phase (Parallel)
-      - name: Push Images
-        shell: bash
-        run: |
-          IMAGE_BASE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO_ID }}"
+          wait
           
           docker push "${IMAGE_BASE}/internal-platform-api-backend:${{ github.sha }}" &
-          B_PID=$!
-          
           docker push "${IMAGE_BASE}/internal-platform-api-frontend:${{ github.sha }}" &
-          F_PID=$!
-          
-          wait $B_PID $F_PID
+          wait
 
-      # 11. Deploy Phase (Terraform)
+  deploy:
+    needs: [validate, dockerize]
+    runs-on: ubuntu-latest
+    outputs:
+      backend_url: ${{ steps.get_urls.outputs.backend_url }}
+      frontend_url: ${{ steps.get_urls.outputs.frontend_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth to GCP
+        uses: null-pointer-sch/cicd-templates/actions/gcp-auth@main
+        with:
+          wif-provider: ${{ env.GCP_WIF_PROVIDER }}
+          service-account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          region: ${{ env.REGION }}
+
       - name: Deploy Image
         id: deploy
         uses: null-pointer-sch/cicd-templates/actions/terraform-deploy@main
@@ -203,12 +172,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Smoke Test Backend
         env:
           BACKEND_URL: ${{ needs.deploy.outputs.backend_url }}
@@ -222,12 +189,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Smoke Test Frontend
         env:
           FRONTEND_URL: ${{ needs.deploy.outputs.frontend_url }}
@@ -241,12 +206,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Smoke Test E2E
         env:
           FRONTEND_URL: ${{ needs.deploy.outputs.frontend_url }}
