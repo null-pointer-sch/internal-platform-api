@@ -112,8 +112,22 @@ curl -s -X POST http://localhost:8000/api/v1/projects/ \
 ├── backend/            # FastAPI Backend (Python 3.12, SQLAlchemy, Pydantic)
 ├── frontend/           # Angular Frontend (Standalone Components, Signals)
 ├── terraform/          # Infrastructure as Code (GCP Cloud Run)
-├── scripts/            # E2E Smoke Testing Suite & CI/CD utilities
+└── scripts/            # E2E Smoke Testing Suite & CI/CD utilities
 ```
+
+---
+
+## ⚡️ One-Command Setup (Local)
+
+For the fastest local setup, use the provided `Makefile`:
+
+```bash
+# Installs both Backend & Frontend dependencies and starts the development servers
+make all
+```
+
+> [!TIP]
+> Use `make stop` to kill all running processes and `make clean` to reset the database and clear caches.
 
 ---
 
