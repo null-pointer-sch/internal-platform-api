@@ -46,13 +46,17 @@
 
       <div *ngIf="successMessage" class="alert alert-success"
         style="background-color: #d4edda; color: #155724; padding: 16px; border-radius: 4px; margin-bottom: 24px; font-weight: 500; border: 1px solid #c3e6cb;">
-        <p style="margin: 0 0 8px 0;">{{ successMessage }}</p>
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1em;">Registration Successful!</h3>
+        <p *ngIf="emailMode !== 'mock_api'"
+          style="margin: 0 0 8px 0; font-weight: 400; font-size: 0.95em; opacity: 0.9;">
+          {{ successMessage }}
+        </p>
 
         <!-- Dev Only verification link (mock_api mode) -->
         <div *ngIf="verificationUrl && emailMode === 'mock_api'"
           style="margin: 12px 0; padding: 12px; background: #fff; border-radius: 4px; border: 1px solid #c3e6cb;">
-          <p style="margin: 0 0 8px 0; font-size: 0.9em;"><strong>Dev Mode:</strong> No real email was sent. Use this
-            link to verify immediately:</p>
+          <p style="margin: 0 0 8px 0; font-size: 0.9em;"><strong>Dev Mode:</strong> No email sent. Use the link below:
+          </p>
           <a [href]="verificationUrl" class="btn btn-sm btn-outline-success"
             style="display: inline-block; text-decoration: none; border: 1px solid #28a745; color: #28a745; padding: 4px 12px; border-radius: 4px; font-size: 0.85em;">
             Verify My Account Now &rarr;
