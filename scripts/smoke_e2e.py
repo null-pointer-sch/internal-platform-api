@@ -28,6 +28,28 @@ class E2ESmokeContext:
             self.headers["X-XSRF-TOKEN"] = token
             # print(f"  (Header X-XSRF-TOKEN set from cookie)")
 
+    def verify_email(self, v_url: str):
+        """Extract token and POST to verification endpoint."""
+        from urllib.parse import urlparse, parse_qs
+        print(f"  -> Found verification link, extracting token...")
+        
+        parsed = urlparse(v_url)
+        params = parse_qs(parsed.query)
+        token = params.get("token", [None])[0]
+        
+        if not token:
+             # Try splitting if it's a direct path instead of full URL
+             if "token=" in v_url:
+                 token = v_url.split("token=")[1].split("&")[0]
+        
+        if not token:
+            raise ValueError(f"Could not extract token from verification URL: {v_url}")
+            
+        print(f"  -> Verifying token {token[:8]}... via POST /api/v1/auth/verify-email")
+        v_resp = self.client.post("/api/v1/auth/verify-email", json={"token": token})
+        self.assert_status(v_resp, 200)
+        print(f"  -> Email successfully verified")
+
     def check(self, name: str, func: Callable[['E2ESmokeContext'], Any]):
         self.step_count += 1
         print(f"[{self.step_count}] Testing {name}...")
@@ -82,19 +104,9 @@ def run_e2e_smoke():
         c.assert_status(resp, 202)
         data = resp.json()
         
-        # In cloud environments, we might be in mock email mode
-        # If so, we can use the verification link directly to bypass SMTP
         v_url = data.get("verification_url")
         if v_url:
-            print(f"  -> Found verification link (mock mode), verifying email...")
-            # If the URL is absolute but points to localhost, we normalize it to use frontend_url
-            if "localhost" in v_url or "127.0.0.1" in v_url:
-                path = v_url.split("/api/v1/")[1]
-                v_url = f"/api/v1/{path}"
-            
-            v_resp = c.client.get(v_url)
-            c.assert_status(v_resp, 200)
-            print(f"  -> Email verified successfully via {v_url}")
+            c.verify_email(v_url)
     
     ctx.check("User Registration via Proxy", step_register)
 
@@ -104,7 +116,14 @@ def run_e2e_smoke():
         payload = {"username": email, "password": password}
         resp = c.client.post("/api/v1/auth/login", data=payload)
         
-        # If this fails with 403, it means the user is unverified
+        # If we get a 403 with a verification_url, try one last time to verify and login
+        if resp.status_code == 403:
+            data = resp.json()
+            if data.get("verification_url"):
+                print("  -> Received 403 Forbidden with verification_url, retrying verification...")
+                c.verify_email(data.get("verification_url"))
+                resp = c.client.post("/api/v1/auth/login", data=payload)
+        
         c.assert_status(resp, 200)
         c.update_csrf_header()
         print(f"  -> Session cookies and CSRF token obtained")
