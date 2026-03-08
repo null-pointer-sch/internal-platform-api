@@ -108,15 +108,24 @@ def authenticate_user(
     user = users_repo.get_user_by_email(db, normalized_email)
 
     if not user:
+        import logging
+        logger = logging.getLogger("envctl")
+        logger.warning(f"Authentication failed: User {normalized_email} not found.")
         return None, None, None
 
     # Check Lockout
     lockout_until = ensure_utc(user.lockout_until)
     if lockout_until and lockout_until > datetime.now(timezone.utc):
+        import logging
+        logger = logging.getLogger("envctl")
+        logger.warning(f"Authentication failed: User {normalized_email} is locked out until {lockout_until}.")
         return None, None, None
 
     # Check Password
     if not verify_password(password, user.password_hash):
+        import logging
+        logger = logging.getLogger("envctl")
+        logger.warning(f"Authentication failed: Incorrect password for {normalized_email}.")
         # Apply Lockout Policy
         user.failed_login_attempts += 1
         user.last_failed_login_at = datetime.now(timezone.utc)

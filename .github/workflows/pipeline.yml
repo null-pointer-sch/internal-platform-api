@@ -49,21 +49,21 @@ jobs:
         shell: bash
         run: |
           cd backend && poetry install &
-          cd ../frontend && npm ci &
+          cd frontend && npm ci &
           wait
 
       - name: Linting
         shell: bash
         run: |
           cd backend && poetry run ruff check . &
-          cd ../frontend && (npm run lint || echo "Frontend lint failed") &
+          cd frontend && (npm run lint || echo "Frontend lint failed") &
           wait
 
       - name: Unit & Integration Tests
         shell: bash
         run: |
           cd backend && poetry run pytest --cov=app --cov-report=xml:../backend/coverage.xml &
-          cd ../frontend && (npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage || echo "Frontend tests skipped") &
+          cd frontend && (npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage || echo "Frontend tests skipped") &
           wait
 
       - name: SonarCloud Scan
