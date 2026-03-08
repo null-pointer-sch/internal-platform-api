@@ -4,6 +4,7 @@ from sqlalchemy import text, inspect
 from sqlalchemy.engine import Engine
 
 logger = logging.getLogger("envctl")
+TIMESTAMP_TZ = "TIMESTAMP WITH TIME ZONE"
 
 def ensure_user_columns(engine: Engine):
     """
@@ -13,12 +14,12 @@ def ensure_user_columns(engine: Engine):
     required_columns = {
         "is_verified": "BOOLEAN DEFAULT FALSE NOT NULL",
         "verification_token_hash": "VARCHAR(255)",
-        "verification_token_expires_at": "TIMESTAMP WITH TIME ZONE",
+        "verification_token_expires_at": TIMESTAMP_TZ,
         "password_reset_token_hash": "VARCHAR(255)",
-        "password_reset_token_expires_at": "TIMESTAMP WITH TIME ZONE",
+        "password_reset_token_expires_at": TIMESTAMP_TZ,
         "failed_login_attempts": "INTEGER DEFAULT 0 NOT NULL",
-        "last_failed_login_at": "TIMESTAMP WITH TIME ZONE",
-        "lockout_until": "TIMESTAMP WITH TIME ZONE",
+        "last_failed_login_at": TIMESTAMP_TZ,
+        "lockout_until": TIMESTAMP_TZ,
     }
 
     try:
@@ -34,7 +35,7 @@ def ensure_user_columns(engine: Engine):
                     # generic enough works for both in most DBs.
                     type_str = column_type
                     if engine.url.drivername == "sqlite":
-                         if "TIMESTAMP WITH TIME ZONE" in type_str:
+                         if TIMESTAMP_TZ in type_str:
                              type_str = "DATETIME"
                     
                     conn.execute(text(f"ALTER TABLE users ADD COLUMN {column_name} {type_str}"))

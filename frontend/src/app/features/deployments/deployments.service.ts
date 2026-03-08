@@ -9,9 +9,9 @@ import { Deployment, DeploymentCreate } from '../../shared/models/deployment.mod
   providedIn: 'root'
 })
 export class DeploymentsService {
-  private apiUrl = `${environment.apiUrl}/api/v1/deployments`;
+  private readonly apiUrl = `${environment.apiUrl}/api/v1/deployments`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getDeployments(environmentId: string): Observable<Deployment[]> {
     return this.http.get<Deployment[]>(`${this.apiUrl}/environments/${environmentId}`)

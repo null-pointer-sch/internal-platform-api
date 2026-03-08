@@ -8,9 +8,9 @@ import { Project, ProjectCreate } from '../../shared/models/project.model';
   providedIn: 'root'
 })
 export class ProjectsService {
-  private apiUrl = `${environment.apiUrl}/api/v1/projects`;
+  private readonly apiUrl = `${environment.apiUrl}/api/v1/projects`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(this.apiUrl);

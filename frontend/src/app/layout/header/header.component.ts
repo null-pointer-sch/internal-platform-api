@@ -14,11 +14,11 @@ import { User } from '../../shared/models/user.model';
 })
 export class HeaderComponent implements OnInit {
   currentUser: User | null = null;
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private readonly authService: AuthService,
+    private readonly cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {

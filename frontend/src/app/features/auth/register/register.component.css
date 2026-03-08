@@ -3,12 +3,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #764ba2 100%);
   padding: 20px;
 }
 
 .register-card {
-  background: white;
+  background: var(--surface-card);
   border-radius: 12px;
   padding: 40px;
   width: 100%;
@@ -19,12 +19,12 @@
 h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
-  color: #333;
+  color: var(--text-main);
   font-weight: 600;
 }
 
 .subtitle {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 32px 0;
   font-size: 14px;
 }
@@ -36,7 +36,7 @@ h1 {
 label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-main);
   font-weight: 500;
   font-size: 14px;
 }
@@ -44,7 +44,7 @@ label {
 .form-control {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   box-sizing: border-box;
@@ -53,16 +53,16 @@ label {
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
 }
 
 .form-control.error {
-  border-color: #e74c3c;
+  border-color: var(--error-color);
 }
 
 .error-message {
-  color: #e74c3c;
+  color: var(--error-color);
   font-size: 12px;
   margin-top: 4px;
 }
@@ -74,9 +74,9 @@ label {
 }
 
 .alert-error {
-  background-color: #fee;
-  color: #c33;
-  border: 1px solid #fcc;
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border: 1px solid var(--error-border);
 }
 
 .btn {
@@ -91,12 +91,12 @@ label {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: var(--primary-hover);
 }
 
 .btn-primary:disabled {
@@ -107,12 +107,12 @@ label {
 .login-link {
   text-align: center;
   margin-top: 24px;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .login-link a {
-  color: #667eea;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }
