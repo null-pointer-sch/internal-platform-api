@@ -60,9 +60,31 @@ export class RegisterComponent {
       next: (res) => {
         this.loading = false;
         this.successMessage = res.detail;
-        this.verificationUrl = res.verification_url || null;
+
+        let vUrl = res.verification_url || null;
+        // If the URL is absolute and points to localhost, make it relative for the proxy
+        if (vUrl && (vUrl.includes('localhost') || vUrl.includes('127.0.0.1'))) {
+          try {
+            const path = new URL(vUrl).pathname + new URL(vUrl).search;
+            this.verificationUrl = path;
+          } catch (e) {
+            this.verificationUrl = vUrl;
+          }
+        } else {
+          this.verificationUrl = vUrl;
+        }
+
         this.emailMode = res.email_mode || null;
         this.registerForm.reset();
+
+        // If not in a mock mode where the user needs to click a link, redirect to login after 3 seconds
+        if (this.emailMode !== 'mock_api') {
+          setTimeout(() => {
+            if (!this.verificationUrl) {
+              this.router.navigate(['/login']);
+            }
+          }, 3000);
+        }
       },
       error: (err) => {
         this.loading = false;
