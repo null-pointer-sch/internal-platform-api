@@ -44,11 +44,6 @@
         <span *ngIf="loading">Signing in...</span>
       </button>
 
-      <div *ngIf="isDevelopment" class="dev-actions">
-        <button type="button" class="btn btn-secondary dev-btn" (click)="loginAsAdmin()" [disabled]="loading">
-          Dev: Login as Admin
-        </button>
-      </div>
     </form>
 
     <p class="register-link">
