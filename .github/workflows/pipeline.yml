@@ -249,7 +249,7 @@ jobs:
           poetry run python ../scripts/smoke_frontend.py
 
   smoke-e2e:
-    needs: deploy
+    needs: [deploy, smoke-backend, smoke-frontend]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
