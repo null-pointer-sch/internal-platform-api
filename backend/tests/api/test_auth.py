@@ -132,3 +132,22 @@ def test_me_authenticated(client):
 def test_me_unauthenticated(client):
     response = client.get("/api/v1/auth/me")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+def test_logout(client):
+    # Log out
+    headers = auth_headers(client)
+    response = client.post("/api/v1/auth/logout", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["detail"] == "Successfully logged out"
+
+def test_forgot_password(client):
+    response = client.post("/api/v1/auth/forgot-password")
+    assert response.status_code == 202
+
+def test_reset_password(client):
+    response = client.post("/api/v1/auth/reset-password")
+    assert response.status_code == 200
+
+def test_verify_email_failure(client):
+    response = client.post("/api/v1/auth/verify-email", json={"token": "invalid"})
+    assert response.status_code == 400

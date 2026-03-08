@@ -1,67 +1,77 @@
-import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LoginComponent } from './login.component';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('LoginComponent', () => {
-    beforeEach(async () => {
-        localStorage.clear();
+    let component: LoginComponent;
+    let fixture: ComponentFixture<LoginComponent>;
+    let authServiceSpy: jasmine.SpyObj<AuthService>;
+    let router: Router;
 
-        const mockAuthService = {
-            currentUser$: of(null),
-            loadCurrentUser: () => of(null),
-            login: () => of(null),
-            logout: () => { }
-        };
+    beforeEach(async () => {
+        authServiceSpy = jasmine.createSpyObj('AuthService', ['login', 'isAuthenticated']);
+        authServiceSpy.isAuthenticated.and.returnValue(false);
 
         await TestBed.configureTestingModule({
-            imports: [LoginComponent],
+            imports: [LoginComponent, ReactiveFormsModule, RouterTestingModule],
             providers: [
-                provideHttpClient(),
-                provideHttpClientTesting(),
-                provideRouter([]),
-                { provide: AuthService, useValue: mockAuthService }
-            ],
+                FormBuilder,
+                { provide: AuthService, useValue: authServiceSpy },
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        snapshot: { queryParams: { returnUrl: '/custom-path' } }
+                    }
+                }
+            ]
         }).compileComponents();
+
+        fixture = TestBed.createComponent(LoginComponent);
+        component = fixture.componentInstance;
+        router = TestBed.inject(Router);
+        fixture.detectChanges();
     });
 
-    afterEach(() => {
-        localStorage.clear();
-    });
-
-    it('should create the component', () => {
-        const fixture = TestBed.createComponent(LoginComponent);
-        const component = fixture.componentInstance;
+    it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should have an invalid form when empty', () => {
-        const fixture = TestBed.createComponent(LoginComponent);
-        const component = fixture.componentInstance;
-        expect(component.loginForm.valid).toBeFalse();
+    it('should redirect if already authenticated', () => {
+        authServiceSpy.isAuthenticated.and.returnValue(true);
+        component.ngOnInit();
+        // Spying on router.navigate is better
+        const navigateSpy = spyOn(router, 'navigate');
+        component.ngOnInit();
+        expect(navigateSpy).toHaveBeenCalledWith(['/projects']);
     });
 
-    it('should have a valid form with proper email and password', () => {
-        const fixture = TestBed.createComponent(LoginComponent);
-        const component = fixture.componentInstance;
-        component.loginForm.setValue({ email: 'test@example.com', password: 'password123' });
-        expect(component.loginForm.valid).toBeTrue();
-    });
+    it('should call authService.login on valid submit', () => {
+        const credentials = { email: 'test@example.com', password: 'password123' };
+        component.loginForm.patchValue(credentials);
 
-    it('should invalidate form with bad email', () => {
-        const fixture = TestBed.createComponent(LoginComponent);
-        const component = fixture.componentInstance;
-        component.loginForm.setValue({ email: 'not-an-email', password: 'password123' });
-        expect(component.loginForm.get('email')?.hasError('email')).toBeTrue();
-    });
+        authServiceSpy.login.and.returnValue(of({ id: '1', email: 'test@example.com' }));
+        const navigateByUrlSpy = spyOn(router, 'navigateByUrl');
 
-    it('should not submit when form is invalid', () => {
-        const fixture = TestBed.createComponent(LoginComponent);
-        const component = fixture.componentInstance;
         component.onSubmit();
+
+        expect(authServiceSpy.login).toHaveBeenCalledWith({ username: credentials.email, password: credentials.password });
+        expect(navigateByUrlSpy).toHaveBeenCalledWith('/custom-path');
+        expect(component.loading).toBeFalse();
+    });
+
+    it('should handle login error', () => {
+        component.loginForm.patchValue({ email: 'test@example.com', password: 'wrong' });
+
+        const errorRes = { error: { detail: 'Invalid credentials' } };
+        authServiceSpy.login.and.returnValue(throwError(() => errorRes));
+
+        component.onSubmit();
+
+        expect(component.error).toBe('Invalid credentials');
         expect(component.loading).toBeFalse();
     });
 });

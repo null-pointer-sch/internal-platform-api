@@ -65,6 +65,14 @@ export class AuthService {
     return this.http.post(`${environment.apiUrl}/api/v1/auth/verify-email`, { token }, { withCredentials: true });
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/v1/auth/forgot-password`, { email }, { withCredentials: true });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/v1/auth/reset-password`, { token, password }, { withCredentials: true });
+  }
+
   logout(): void {
     this.http.post(`${environment.apiUrl}/api/v1/auth/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {

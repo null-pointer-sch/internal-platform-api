@@ -36,7 +36,7 @@ export class DeploymentsService {
     return this.http.post<Deployment>(`${this.apiUrl}/environments/${environmentId}`, deployment);
   }
 
-  getDeploymentLogs(deploymentId: string): Observable<{ logs: string }> {
-    return this.http.get<{ logs: string }>(`${this.apiUrl}/${deploymentId}/logs`);
+  getDeploymentLogs(deploymentId: string): Observable<{ deployment_logs: string; app_logs: string }> {
+    return this.http.get<{ deployment_logs: string; app_logs: string }>(`${this.apiUrl}/${deploymentId}/logs`);
   }
 }

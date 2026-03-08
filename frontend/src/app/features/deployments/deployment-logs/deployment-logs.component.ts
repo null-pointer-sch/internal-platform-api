@@ -155,6 +155,11 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
                         timeout(5000),
                         catchError(err => {
                             console.error('Request timeout or error:', err);
+                            this.ngZone.run(() => {
+                                this.error = 'Failed to load logs';
+                                this.loading = false;
+                                this.cdr.detectChanges();
+                            });
                             return of({ deployment_logs: this.deploymentLogs, app_logs: this.appLogs });
                         })
                     );
