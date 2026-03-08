@@ -81,8 +81,8 @@ export class LoginComponent implements OnInit {
 
   loginAsAdmin(): void {
     this.loginForm.patchValue({
-      email: 'admin@envctl.dev',
-      password: 'adminpassword'
+      email: environment.devAdminEmail,
+      password: environment.devAdminPassword
     });
     this.onSubmit();
   }

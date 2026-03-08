@@ -1,4 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: ''
+  apiUrl: '',
+  devAdminEmail: 'admin@envctl.dev',
+  devAdminPassword: 'adminpassword'
 };

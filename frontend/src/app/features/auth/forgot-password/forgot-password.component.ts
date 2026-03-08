@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -41,7 +41,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     </div>
   `
 })
-export class ForgotPasswordComponent implements OnInit {
+export class ForgotPasswordComponent {
   forgotPasswordForm: FormGroup;
   loading = false;
   success = false;
@@ -57,7 +57,6 @@ export class ForgotPasswordComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { }
 
   onSubmit(): void {
     if (this.forgotPasswordForm.invalid) return;

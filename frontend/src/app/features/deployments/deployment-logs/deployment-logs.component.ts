@@ -140,7 +140,8 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
             const matches = text.match(regex);
             this.matchesCount = matches ? matches.length : 0;
             this.currentMatchIndex = 0;
-        } catch (ignored) {
+        } catch (_error) {
+            // If regex parsing fails (e.g. invalid query while typing), reset matches
             this.matchesCount = 0;
         }
     }

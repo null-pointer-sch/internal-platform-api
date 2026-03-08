@@ -16,7 +16,7 @@ export class DeploymentsService {
   getDeployments(environmentId: string): Observable<Deployment[]> {
     return this.http.get<Deployment[]>(`${this.apiUrl}/environments/${environmentId}`)
       .pipe(
-        map(deployments => deployments.sort((a, b) =>
+        map(deployments => [...deployments].sort((a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         ))
       );

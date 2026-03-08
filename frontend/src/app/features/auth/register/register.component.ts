@@ -29,7 +29,7 @@ export class RegisterComponent {
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, {
-      validators: this.passwordMatchValidator
+      validators: [this.passwordMatchValidator]
     });
   }
 
@@ -67,7 +67,8 @@ export class RegisterComponent {
           try {
             const path = new URL(vUrl).pathname + new URL(vUrl).search;
             this.verificationUrl = path;
-          } catch (e) {
+          } catch (_error) {
+            // Fallback if URL parsing fails
             this.verificationUrl = vUrl;
           }
         } else {
