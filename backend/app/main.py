@@ -95,13 +95,17 @@ async def log_preflight_diagnostic(request: Request, call_next):
 
 app.add_middleware(CSRFMiddleware)
 
+# Determine allowed origins
+allowed_origins = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+]
+if settings.frontend_url and settings.frontend_url != "http://localhost:4200":
+    allowed_origins.append(settings.frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        settings.frontend_url,
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

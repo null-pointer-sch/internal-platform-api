@@ -8,7 +8,7 @@ from tests.api.test_auth import auth_headers
 def create_project(client, headers, name="Test Project"):
     """Helper to create a project and return the response."""
     return client.post(
-        "/api/v1/projects/",
+        "/api/v1/projects",
         json={"name": name, "description": "A test project"},
         headers=headers,
     )
@@ -32,7 +32,7 @@ def test_list_projects(client):
     create_project(client, headers, "Project A")
     create_project(client, headers, "Project B")
 
-    response = client.get("/api/v1/projects/", headers=headers)
+    response = client.get("/api/v1/projects", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert len(data) == 2
@@ -79,12 +79,12 @@ def test_project_isolation(client):
 
     # Step 2: Login User B and verify they see nothing
     headers_b = auth_headers(client, email="b@example.com")
-    response = client.get("/api/v1/projects/", headers=headers_b)
+    response = client.get("/api/v1/projects", headers=headers_b)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0
 
     # Step 3: Switch back to User A and verify they see their project
     headers_a = auth_headers(client, email="a@example.com")
-    response = client.get("/api/v1/projects/", headers=headers_a)
+    response = client.get("/api/v1/projects", headers=headers_a)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 1

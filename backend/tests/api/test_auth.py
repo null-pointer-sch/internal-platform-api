@@ -47,7 +47,7 @@ def test_register_success(client):
     response = register_user(client)
     assert response.status_code == status.HTTP_202_ACCEPTED
     data = response.json()
-    assert "verification link has been sent" in data["detail"]
+    assert "verification instructions have been prepared" in data["detail"]
 
 
 def test_register_duplicate_email(client):
@@ -55,7 +55,7 @@ def test_register_duplicate_email(client):
     response = register_user(client)
     # The new implementation returns 202 even for duplicates to prevent email enumeration
     assert response.status_code == status.HTTP_202_ACCEPTED
-    assert "If the email can be registered" in response.json()["detail"]
+    assert "verification instructions have been prepared" in response.json()["detail"]
 
 
 def test_register_invalid_email(client):

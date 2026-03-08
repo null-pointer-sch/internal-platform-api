@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.models.user import User
@@ -92,8 +91,8 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
         key="envctl-session",
         value=session_id,
         httponly=True,
-        secure=True,         
-        samesite="none",   
+        secure=use_secure_cookies,
+        samesite=samesite_policy,
         path="/",
     )
 
@@ -102,8 +101,8 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
         key="XSRF-TOKEN",
         value=csrf_token,
         httponly=False,
-        secure=True,
-        samesite="none",
+        secure=use_secure_cookies,
+        samesite=samesite_policy,
         path="/",
     )
 

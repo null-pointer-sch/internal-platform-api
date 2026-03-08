@@ -37,7 +37,6 @@ module "backend" {
 
   env_vars = {
     DATABASE_URL = var.database_url
-    FRONTEND_URL = module.frontend.service_url
   }
 
   # Using defaults for CPU (1) and Memory (512Mi)
@@ -58,6 +57,10 @@ module "frontend" {
   # Using defaults for CPU (1) and Memory (512Mi)
   min_instance_count = 0
   max_instance_count = 5
+
+  env_vars = {
+    BACKEND_URL = module.backend.service_url
+  }
 }
 
 output "backend_url" {

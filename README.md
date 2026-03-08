@@ -8,10 +8,12 @@ The API manages **projects**, **environments**, and **deployments**, inspired by
 
 ```mermaid
 graph LR
-    A[Client/CLI] --> B[FastAPI]
-    B --> C[(PostgreSQL)]
-    B --> D[Simulated Provisioner]
-    D --> E[Simulated Deployment]
+    A[Client/CLI] --> B[Nginx Proxy]
+    B --> C[Angular Frontend]
+    B --> D[FastAPI Backend]
+    D --> E[(PostgreSQL)]
+    D --> F[Simulated Provisioner]
+    F --> G[Simulated Deployment]
 ```
 
 This project intentionally uses **simulated provisioning and deployment flows** to focus on **API design, data modelling, authentication, and platform concepts**, rather than real infrastructure execution.
@@ -21,153 +23,84 @@ This project intentionally uses **simulated provisioning and deployment flows** 
 ## 🌍 Live Demo (Cloud Run – Europe)
 
 - **Frontend UI**: https://internal-platform-api-frontend-3vr6excz6q-ew.a.run.app
-- **Backend API**: https://internal-platform-api-backend-3vr6excz6q-ew.a.run.app
-- **API Docs**: [Swagger UI](https://internal-platform-api-backend-3vr6excz6q-ew.a.run.app/docs) | [ReDoc](https://internal-platform-api-backend-3vr6excz6q-ew.a.run.app/redoc)
-- **Health Check**: https://internal-platform-api-backend-3vr6excz6q-ew.a.run.app/health
-
----
-
-## ⚠️ Current Status
-
-The backend API and deployment are functional, but the deployed frontend authentication flow is still being stabilized. In the current Cloud Run environment, registration, login, and session persistence may behave inconsistently across the frontend and backend origins.
-
-For the most reliable testing experience, use the backend API directly via Swagger or curl while the frontend auth flow is being finalized.
-
----
-
-### Production Deployment
-- **Backend**: Google Cloud Run (fully managed, auto-scaling, serverless)
-- **Database**: Neon (serverless PostgreSQL with connection pooling)
-- **Authentication**: JWT-based
-- **CI/CD**: GitHub Actions → Docker → Terraform → Cloud Run
+- **Backend API**: https://internal-platform-api-backend-3vr6excz6q-ew.a.run.app (via Proxy)
+- **API Docs**: [Swagger UI](https://internal-platform-api-frontend-3vr6excz6q-ew.a.run.app/api/v1/docs)
+- **Health Check**: https://internal-platform-api-frontend-3vr6excz6q-ew.a.run.app/api/v1/health
 
 ---
 
 ## 🚀 Features
 
-### 🔐 Authentication
-- Register, login, and session based authentication
-- Endpoints: `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/me`
+### 🔐 Authentication & Security
+- **Full Auth Flow**: Register, Verify Email (Mock), Login, and Logout.
+- **Dual Session Support**: Uses **Cookie-based sessions** with **CSRF protection** (XSRF-TOKEN) for the browser/UI, and supports **Bearer JWT** for API-first usage.
+- **Reverse Proxy Architecture**: Nginx gracefully handles routing and path normalization (`/api/v1`).
 
 ### 📦 Projects
-- Represent applications owned by authenticated users
-- Full CRUD under `/api/v1/projects`
+- Represent applications owned by authenticated users.
+- Full CRUD under `/api/v1/projects`.
 
 ### 🌱 Environments
-- Belong to a project
-- Types: `ephemeral` or `persistent`
-- Lifecycle simulation: `provisioning` → `running`
-- TTL support for ephemeral environments
-- Fake base URL assigned during provisioning
+- Belong to a project with `ephemeral` or `persistent` types.
+- Lifecycle simulation: `provisioning` → `running`.
+- TTL support for ephemeral environments.
+- Dynamic metadata (Base URL/ID) assignment during provisioning.
 
 ### 🚢 Deployments
-- Target a specific environment
-- Version tracking (git SHA, tag, etc.)
-- Lifecycle simulation: `pending` → `running` → `succeeded`
-- Fake logs endpoint
-- Simulated async rollout
-- Deployment state transitions are simulated to mirror real-world platform behavior
+- Version tracking (git SHA, tag) targeted at specific environments.
+- Lifecycle simulation: `pending` → `running` → `succeeded`.
+- Simulated async rollout and fake log streaming.
 
-### 🧱 Stack
-- **FastAPI**
-- **SQLAlchemy ORM**
-- **JWT (python-jose)**
-- **Passlib** for password hashing
-- **Alembic-ready** migrations
-- **Poetry** for dependency management
-- **Docker** (multi-stage Dockerfile)
-- **Helm** chart for Kubernetes deployments (`envctl-chart/`)
-- **Pytest** for API and integration testing
+### 🧱 CI/CD & Infrastructure
+- **Parallel Pipeline**: Faster cycle times via concurrent `test` and `dockerize` jobs.
+- **Smart Caching**: GitHub Actions caching enabled for both `npm` and `poetry`.
+- **Terraform IAC**: Fully automated deployment to Google Cloud Run and Artifact Registry.
+- **E2E Smoke Testing**: Automated Python-based smoke tests (Backend, Frontend, and E2E) run on every push to ensure stability.
 
 ---
 
 ## 🛠 Installation & Running Locally
 
-### 1. Install dependencies
-
+### 1. Backend (FastAPI)
 ```bash
+cd backend
 poetry install
+poetry run uvicorn app.main:app --reload --port 8000
 ```
+Docs: `http://localhost:8000/docs`
 
-### 2. Run the app
-
+### 2. Frontend (Angular)
 ```bash
-poetry run uvicorn app.main:app --reload
+cd frontend
+npm install
+npm start
 ```
-
-The API will be available at:
-
-```
-http://127.0.0.1:8000
-```
-
-### 3. API Docs
-
-- Swagger UI: http://127.0.0.1:8000/docs  
-- ReDoc: http://127.0.0.1:8000/redoc
+UI: `http://localhost:4200` (Note: requires running the backend or configuring a proxy).
 
 ---
 
 ## 🧪 Example Usage (with curl)
 
 ### 1. Register user
-
 ```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/auth/register   -H "Content-Type: application/json"   -d '{"email":"test@example.com","password":"secret123"}'
+curl -s -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret123"}'
 ```
 
-### 2. Login and copy token
-
+### 2. Login
 ```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login   -H "Content-Type: application/x-www-form-urlencoded"   -d "username=test@example.com&password=secret123"
+curl -s -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=test@example.com&password=secret123"
 ```
 
-Extract the `access_token` and export it:
-
+### 3. Create a project (Bearer Auth)
 ```bash
-TOKEN="paste_the_token_here"
-```
-
----
-
-## 🏗 Create a project
-
-```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/projects/   -H "Authorization: Bearer $TOKEN"   -H "Content-Type: application/json"   -d '{"name":"payments","description":"payment service"}'
-```
-
-Copy `"id"` → set as `PROJECT_ID`.
-
----
-
-## 🌱 Create an Environment
-
-```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/environments/projects/$PROJECT_ID   -H "Authorization: Bearer $TOKEN"   -H "Content-Type: application/json"   -d '{"name":"preview-pr-123","type":"ephemeral","ttl_hours":24}'
-```
-
-Copy `"id"` → set as `ENV_ID`.
-
-The environment will transition automatically from:
-
-```
-provisioning → running
-```
-
----
-
-## 🚢 Deploy to Environment
-
-```bash
-curl -s -X POST http://127.0.0.1:8000/api/v1/deployments/environments/$ENV_ID   -H "Authorization: Bearer $TOKEN"   -H "Content-Type: application/json"   -d '{"version":"sha-1234567"}'
-```
-
-Copy `"id"` → set as `DEPLOYMENT_ID`.
-
-Check deployment status:
-
-```bash
-curl -s   -H "Authorization: Bearer $TOKEN"   http://127.0.0.1:8000/api/v1/deployments/$DEPLOYMENT_ID
+curl -s -X POST http://localhost:8000/api/v1/projects/ \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"payments","description":"payment service"}'
 ```
 
 ---
@@ -176,31 +109,25 @@ curl -s   -H "Authorization: Bearer $TOKEN"   http://127.0.0.1:8000/api/v1/deplo
 
 ```
 .
-├── backend/            # FastAPI Backend
-│   ├── app/            # Core logic
-│   ├── tests/          # Pytest suite
-│   └── Dockerfile
-├── frontend/           # Angular Frontend
-│   ├── src/            # App components/services
-│   └── Dockerfile
-├── terraform/          # Infrastructure as Code
-└── cicd-templates/     # Remote git modules (Central Repo)
+├── backend/            # FastAPI Backend (Python 3.12, SQLAlchemy, Pydantic)
+├── frontend/           # Angular Frontend (Standalone Components, Signals)
+├── terraform/          # Infrastructure as Code (GCP Cloud Run)
+└── scripts/            # E2E Smoke Testing Suite & CI/CD utilities
 ```
 
 ---
 
-## Prerequisites
-- **Python**: 3.12+ 
-- **Poetry**: For dependency management
-- **PostgreSQL**: (Optional) Required if not using the default SQLite logic (though the README mentions Neon/Postgres for production).
+## ⚡️ One-Command Setup (Local)
 
-## 🧩 Future Improvements
-- Real provisioning via Kubernetes (helm, kubectl)
-- GitOps integration
-- Async worker with Celery / RQ
-- Real logs streaming
-- Proper environment variables & secrets management
-- Docker Compose (API + Postgres)
+For the fastest local setup, use the provided `Makefile`:
+
+```bash
+# Installs both Backend & Frontend dependencies and starts the development servers
+make all
+```
+
+> [!TIP]
+> Use `make stop` to kill all running processes and `make clean` to reset the database and clear caches.
 
 ---
 

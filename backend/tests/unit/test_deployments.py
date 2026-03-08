@@ -41,7 +41,8 @@ def test_run_deployment_success(test_db):
     # verify
     test_db.refresh(dep)
     assert dep.status == "succeeded"
-    assert "https://" in dep.logs_url
+    assert "/environments/" in dep.logs_url
+    assert "/deployments/" in dep.logs_url
 
 
 def test_run_deployment_failed_env_not_found(test_db):
