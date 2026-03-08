@@ -26,6 +26,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Poetry
+        run: pipx install poetry
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -43,25 +46,13 @@ jobs:
       - name: Install Dependencies
         shell: bash
         run: |
-          cd backend
-          if ! command -v poetry &> /dev/null; then
-            curl -sSL https://install.python-poetry.org | python3 -
-            echo "/home/runner/.local/bin" >> $GITHUB_PATH
-          fi
-          export PATH="/home/runner/.local/bin:$PATH"
-          poetry install &
-          B_PID=$!
-          
-          cd ../frontend
-          npm ci &
-          F_PID=$!
-          
-          wait $B_PID $F_PID
+          cd backend && poetry install &
+          cd ../frontend && npm ci &
+          wait
 
       - name: Linting
         shell: bash
         run: |
-          export PATH="/home/runner/.local/bin:$PATH"
           cd backend && poetry run ruff check . &
           cd ../frontend && (npm run lint || echo "Frontend lint failed") &
           wait
@@ -69,7 +60,6 @@ jobs:
       - name: Unit & Integration Tests
         shell: bash
         run: |
-          export PATH="/home/runner/.local/bin:$PATH"
           cd backend && poetry run pytest --cov=app --cov-report=xml:../backend/coverage.xml &
           cd ../frontend && (npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage || echo "Frontend tests skipped") &
           wait
