@@ -190,4 +190,8 @@ jobs:
           
           cd ..
           # Run the robust smoke test script using poetry to access httpx
-          FRONTEND_URL=$FRONTEND_URL BACKEND_URL=$BACKEND_URL poetry run python scripts/smoke_test.py
+          echo "🚀 Running post-deploy smoke test..."
+          FRONTEND_URL=$FRONTEND_URL BACKEND_URL=$BACKEND_URL poetry run python scripts/smoke_test.py || {
+            echo "❌ ERROR: Smoke test failed! See details above."
+            exit 1
+          }
