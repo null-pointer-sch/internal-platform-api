@@ -183,14 +183,11 @@ jobs:
       - name: Post-Deploy Smoke Test
         shell: bash
         run: |
-          # Use terraform output to get URL if possible, otherwise construct it
-          # Since the action runs apply, we can run output in the same directory
+          export PATH="/home/runner/.local/bin:$PATH"
           cd terraform
           BACKEND_URL=$(terraform output -raw backend_url)
           FRONTEND_URL=$(terraform output -raw frontend_url)
           
-          echo "Testing Backend at $BACKEND_URL..."
-          curl -f -s "$BACKEND_URL/health" || (echo "Backend health check failed!" && exit 1)
-          
-          echo "Testing Frontend at $FRONTEND_URL..."
-          curl -f -s "$FRONTEND_URL" || (echo "Frontend health check failed!" && exit 1)
+          cd ..
+          # Run the robust smoke test script using poetry to access httpx
+          FRONTEND_URL=$FRONTEND_URL BACKEND_URL=$BACKEND_URL poetry run python scripts/smoke_test.py
