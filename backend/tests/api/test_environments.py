@@ -1,4 +1,3 @@
-import uuid
 from fastapi import status
 from tests.api.test_auth import auth_headers
 from tests.api.test_projects import create_project

@@ -154,7 +154,8 @@ export class DeploymentLogsComponent implements OnInit, OnDestroy {
                     return this.deploymentsService.getDeploymentLogs(this.depId!).pipe(
                         timeout(5000),
                         catchError(err => {
-                            console.error('Request timeout or error:', err);
+                            // Reduced log level for caught errors to reduce noise in tests/logs
+                            console.warn('DeploymentLogsComponent: Handled log fetch error', err);
                             this.ngZone.run(() => {
                                 this.error = 'Failed to load logs';
                                 this.loading = false;

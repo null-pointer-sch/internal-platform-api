@@ -1,7 +1,6 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app.services.email import send_verification_email, send_password_reset_email, _send_real_email
-from app.core.config import settings
 
 @pytest.fixture
 def mock_settings():

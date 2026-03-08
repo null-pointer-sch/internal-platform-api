@@ -1,4 +1,3 @@
-import pytest
 import uuid
 from app.services.provisioning import provision_environment
 from app.models.environment import Environment

@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime, timedelta, timezone
 from app.services.auth import (
     register_user,
@@ -9,7 +8,6 @@ from app.services.auth import (
     ensure_utc
 )
 from app.schemas.user import UserCreate
-from app.core.config import settings
 
 def test_ensure_utc_handles_none():
     assert ensure_utc(None) is None

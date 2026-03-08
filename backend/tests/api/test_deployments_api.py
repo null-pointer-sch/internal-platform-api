@@ -1,4 +1,3 @@
-import pytest
 import uuid
 from fastapi import status
 from tests.api.test_auth import auth_headers
